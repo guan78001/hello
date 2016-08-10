@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stl_samples", "stl_samples\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DesignPattern", "DesignPattern\DesignPattern.vcxproj", "{293DEA46-43B4-4273-BC91-7E73044F17E8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Numeric", "Numeric\Numeric.vcxproj", "{C0D04AAD-C748-471B-A217-EE1F5510E8C2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -21,6 +23,10 @@ Global
 		{293DEA46-43B4-4273-BC91-7E73044F17E8}.Debug|Win32.Build.0 = Debug|Win32
 		{293DEA46-43B4-4273-BC91-7E73044F17E8}.Release|Win32.ActiveCfg = Release|Win32
 		{293DEA46-43B4-4273-BC91-7E73044F17E8}.Release|Win32.Build.0 = Release|Win32
+		{C0D04AAD-C748-471B-A217-EE1F5510E8C2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C0D04AAD-C748-471B-A217-EE1F5510E8C2}.Debug|Win32.Build.0 = Debug|Win32
+		{C0D04AAD-C748-471B-A217-EE1F5510E8C2}.Release|Win32.ActiveCfg = Release|Win32
+		{C0D04AAD-C748-471B-A217-EE1F5510E8C2}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
