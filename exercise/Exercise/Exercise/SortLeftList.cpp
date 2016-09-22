@@ -52,6 +52,7 @@ Node* CreateList()
 {
 	Node *head = new Node(0);
 	int arr[] = { 8,4, 1, 3,2,5 };
+
 	int len = sizeof(arr) / sizeof(arr[0]);
 	Node *cur = head;
 	for (int i = 0; i < len; i++)
@@ -124,10 +125,12 @@ void LSort2(Node *h)
 	{
 		Node *p = pSorted->left;
 		Node *pmin = p;
+
 		Node *pmin_prev = pSorted;
 
 		//find min node
 		Node *prev = pSorted;
+
 		while (p != h)
 		{
 			if (p->data < pmin->data)
