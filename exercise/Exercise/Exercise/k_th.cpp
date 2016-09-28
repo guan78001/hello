@@ -3,6 +3,7 @@
 #include <functional>
 #include <iostream>
 #include <queue>
+
 using namespace std;
 
 int rotateArray(int *arr, int N) {
@@ -36,7 +37,28 @@ int rotateArray(int *arr, int N) {
 
   return 0;
 }
+
+void test_bin_search() {
+  int arr[] = { 1, 2, 4, 3, 6, 5, 7, 8 };
+  int n = sizeof(arr) / sizeof(arr[0]);
+
+  sort(arr, arr + n);
+  auto it = lower_bound(arr, arr + n, 3);
+  auto it2 = upper_bound(arr, arr + n, 3);
+  auto it3 = it;
+  std::advance(it3, 1);
+  printf("*it3=%d\n", *it3);
+  printf("%d-%d,diff=%d\n", *it, *it2, std::distance(it, it2));
+  std::binary_search(arr, arr + n, 8);
+  for (int i : arr) {
+    printf("%d ", i);
+  }
+  printf("\n");
+}
 int main() {
+  test_bin_search();
+  return 0;
+
   const int N = 5;
   int arr[N * N] = { 0 };
 
