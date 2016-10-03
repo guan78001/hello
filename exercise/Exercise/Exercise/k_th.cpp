@@ -37,7 +37,45 @@ int rotateArray(int *arr, int N) {
 
   return 0;
 }
+int lower_pos(int *arr, int len, int val)
+{
+	int left = 0;
+	int right = len;
 
+	while (left<right)
+	{
+		int mid = (left + right) / 2;
+		if (arr[mid]<val)
+		{
+			left = mid + 1;
+		}
+		else
+		{
+			right = mid;
+		}
+	}
+	return left;
+}
+int lower_pos2(int *arr, int len, int val)
+{
+	int left = 0;
+	int right = len;
+	if (left >= right)
+	{
+		return 0;
+	}
+
+	int mid = (left + right) / 2;
+	if (arr[mid] < val)
+	{
+		left = mid + 1;
+	}
+	else
+	{
+		right = mid;
+	}
+	return left + lower_pos2(arr + left, right - left, val);
+}
 void test_bin_search() {
   int arr[] = { 1, 2, 4, 3, 6, 5, 7, 8 };
   int n = sizeof(arr) / sizeof(arr[0]);
@@ -55,7 +93,32 @@ void test_bin_search() {
   }
   printf("\n");
 }
+void foo(int x)
+{
+	cout << "x=" << x << endl;
+}
+void test_lower_bound()
+{
+	vector<int> v{ 1, 2 };
+	
+	for (int val = 1; val < 4; val++)
+	{
+		auto it = lower_bound(v.begin(), v.end(), val);
+		cout << lower_pos(&v[0], v.size(), val) << endl;
+		cout << lower_pos2(&v[0], v.size(), val) << endl;
+		if (it == v.end()) {
+			cout << "end" << endl;
+		}
+		else {
+			cout << "push at pos " << (it - v.begin()) << endl;
+		}
+	}
+
+}
 int main() {
+  test_lower_bound();
+  return 0;
+
   test_bin_search();
   return 0;
 
