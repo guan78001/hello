@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="5_Longest Palindromic Substring.cpp" />
+    <ClCompile Include="211_Add and Search Word - Data structure design.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6C6D3C10-20F1-4635-85B7-3878CA5580E3}</ProjectGuid>
