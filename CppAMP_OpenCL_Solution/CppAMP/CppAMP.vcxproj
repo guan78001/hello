@@ -50,13 +50,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\code\cpp\CppAMP\OpenCL\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\code\cpp\CppAMP\OpenCL\Lib\msvc\vc12\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\OpenCL\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\OpenCL\Lib\msvc\vc12\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\code\cpp\CppAMP\OpenCL\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\code\cpp\CppAMP\OpenCL\Lib\msvc\vc12\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\OpenCL\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\OpenCL\Lib\msvc\vc12\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
