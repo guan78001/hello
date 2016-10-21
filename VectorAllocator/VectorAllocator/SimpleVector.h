@@ -1,4 +1,51 @@
 #pragma once
+#include "SimpleAllocator.hpp"
+
+
+
+static int s_table[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
+int s_table_len = sizeof(s_table) / sizeof(s_table[0]);
+template<class T>
+struct BuddyAllocator {
+  std::map<int, T *> m_freelist;
+  BuddyAllocator()
+  {}
+
+  struct Node {
+    Node *next;
+  };
+  void Init() {
+    for (int i = 0; i < 8; i++) {
+      int len = 1024;
+      T *p = malloc(len * sizeof(T)*s_table[i]);
+
+      //make list.
+      T *cur = p;
+      for (int i = 0; i < len-1; i++) {
+        T *next = cur + s_table;
+        *cur = next;
+        cur = next;
+      }
+      *cur = 0;
+    }
+  }
+  ~BuddyAllocator()
+  {}
+  T *allocate(size_t n) {
+    auto it = m_freelist.find(n);
+    if (it==m_freelist.end()) {
+    }
+  }
+  void deallocate(T *p, size_t n) {
+
+  }
+  int lkup(int n) {
+
+    auto it = std::lower_bound(table, table + 8, n);
+
+  }
+
+};
 template<class T>
 class  SimpleVector {
  public: //iterator
@@ -119,6 +166,7 @@ class  SimpleVector {
     }
     return d_last;
   }
+
   T *allocate(size_t len) {
     T *p = (T *)malloc(len * sizeof(T));
     return p;
