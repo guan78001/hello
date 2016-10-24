@@ -1,50 +1,129 @@
 #pragma once
-#include "SimpleAllocator.hpp"
+#include <map>
+#include <vector>
+#include <assert.h>
+#include <algorithm>
 
-
-
-static int s_table[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
-int s_table_len = sizeof(s_table) / sizeof(s_table[0]);
+//#include "SimpleAllocator.hpp"
+const int s_table_len = 8;
+static int s_table[s_table_len] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 template<class T>
 struct BuddyAllocator {
-  std::map<int, T *> m_freelist;
-  BuddyAllocator()
-  {}
-
-  struct Node {
-    Node *next;
-  };
-  void Init() {
-    for (int i = 0; i < 8; i++) {
-      int len = 1024;
-      T *p = malloc(len * sizeof(T)*s_table[i]);
-
-      //make list.
-      T *cur = p;
-      for (int i = 0; i < len-1; i++) {
-        T *next = cur + s_table;
-        *cur = next;
-        cur = next;
+  enum { kMaxCount = 4,kFreeTableLen=8 };
+  //T *m_freelist[8];
+  std::vector<T *> m_blocks[kFreeTableLen];
+  T *m_freelist[kFreeTableLen];
+  BuddyAllocator() {
+    Init();
+  }
+  ~BuddyAllocator() {
+    for (int i = 0; i < kFreeTableLen; i++) {
+      for (int j = 0; j < m_blocks[i].size(); j++) {
+        free(m_blocks[i][j]);
       }
-      *cur = 0;
+      m_blocks[i].clear();
     }
   }
-  ~BuddyAllocator()
-  {}
+
   T *allocate(size_t n) {
-    auto it = m_freelist.find(n);
-    if (it==m_freelist.end()) {
+    //if (n < 1) throw;
+    int pos = index(n);
+    if (pos < kFreeTableLen) {
+      if (!m_freelist[pos]) {
+        NewBlock(n, pos);
+      }
+
+      T *p = m_freelist[pos];
+      m_freelist[pos] = nextof(p);
+
+      return p;
+    } else {
+      return (T *)malloc(n*sizeof(T));
     }
   }
   void deallocate(T *p, size_t n) {
-
+    if (!p) return;
+    if (n < kFreeTableLen) {
+      int pos = index(n);
+      nextof(p)= m_freelist[pos];
+      m_freelist[pos] = p;
+    } else {
+      free(p);
+    }
   }
-  int lkup(int n) {
 
-    auto it = std::lower_bound(table, table + 8, n);
-
+  static int index(int n) {
+    int *pos = std::upper_bound(s_table, s_table + s_table_len, n - 1);
+    return pos - s_table;
   }
 
+  static void test() {
+    //test index()
+    assert(index(1)==0);
+    assert(index(2) == 1);
+    assert(index(3) == 2);
+    assert(index(4) == 2);
+    assert(index(5) == 3);
+    assert(index(6) == 3);
+    assert(index(7) == 3);
+    assert(index(8) == 3);
+    assert(index(9) == 4);
+    assert(index(127) == 7);
+    assert(index(128) == 7);
+    assert(index(129) == 8);
+    assert(index(512) == 8);
+
+    BuddyAllocator ba;
+    //test BuddyAllocator
+    for (int i = 0; i < kFreeTableLen; i++) {
+      T *p = ba.m_freelist[i];
+      for (int t = 0; t < kMaxCount; t++) p = nextof(p);
+      assert(p == nullptr);
+    }
+
+    //test allocator
+    T *p = ba.m_freelist[0];
+    vector<T *> arr;
+    arr.resize(2*kMaxCount);
+    int n = 2;
+    arr[0] = ba.allocate(n);
+    assert(ba.m_freelist[index(n)] == nextof(arr[0]));
+    arr[1] = ba.allocate(n);
+    assert(ba.m_freelist[index(n)] == nextof(arr[1]));
+    assert(arr[1] == nextof(arr[0]));
+
+    ba.deallocate(arr[0],n);
+    assert(ba.m_freelist[index(n)] == arr[0]);
+    ba.deallocate(arr[1],n);
+    assert(ba.m_freelist[index(n)] == arr[1]);
+  }
+ private:
+
+  static T *&nextof(T *p) {
+    return *(T **)p;
+  }
+  void Init() {
+    for (int i = 0; i < kFreeTableLen; i++) {
+      int len = kMaxCount;
+      NewBlock(len, i);
+    }
+  }
+
+  void NewBlock(int len, int pos) {
+    T *p = (T *)malloc(len * sizeof(T)*s_table[pos]);
+
+    //make list.
+    T *cur = p;
+    size_t step = s_table[pos];
+    for (int j = 0; j < len - 1; j++) {
+      T *next = cur + step;
+      nextof(cur) = next;
+      cur = next;
+    }
+    nextof(cur) = nullptr;
+    m_blocks[pos].push_back(p);
+    m_freelist[pos] = p;
+  }
 };
 template<class T>
 class  SimpleVector {
@@ -80,7 +159,6 @@ class  SimpleVector {
   //}
 
  public:
-
   inline size_t size() const { return m_last; }
   inline size_t capacity()  const { return m_capacity;}
   bool empty() const { return 0 == m_last; }
@@ -123,7 +201,9 @@ class  SimpleVector {
       Construct(p + pos, val);
       Copy(begin() + pos, end(), p + pos + 1);
 
+      //deallocate old memory
       deallocate();
+
       m_last += 1;
       m_array = p;
     } else {
@@ -168,12 +248,14 @@ class  SimpleVector {
   }
 
   T *allocate(size_t len) {
-    T *p = (T *)malloc(len * sizeof(T));
+    //T *p = (T *)malloc(len * sizeof(T));
+    T *p=s_ba.allocate(len);
     return p;
   }
   void deallocate() {
     Destruct(begin(), end());
-    free(m_array);
+    //free(m_array);
+    s_ba.deallocate(m_array, s_ba.index(size()));
   }
   void checkRange(size_t pos, size_t len) const {
 #if 0
@@ -188,7 +270,9 @@ class  SimpleVector {
   T *m_array;
   size_t m_last;
   size_t m_capacity;
+  static BuddyAllocator<T> s_ba;
 };
+BuddyAllocator<int> SimpleVector<int>::s_ba;
 
 template<class T>
 void SimpleVector<T>::resize(size_t len, const T &c) {

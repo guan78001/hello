@@ -40,13 +40,8 @@ void print(SimpleVector<int> &v, char *msg = nullptr) {
   }
   printf("\n");
 }
-int main() {
-  //vector<int> sv;
-  //sv.reserve(0);
-  //cout << sv.capacity() << endl;
-  //sv.push_back(0);
-  //sv.insert(sv.end(), 0);
 
+void SimpleAllocator_test() {
   SimpleVector<int> v;
   print(v, "init");
   v.insert(v.end(), 1);
@@ -68,5 +63,35 @@ int main() {
 
   v.insert(v.end(), 5);
   print(v, "after_insert");
+}
+void test_BuddyAllocator() {
+  typedef int T;
+  BuddyAllocator<T> ba;
+  vector<T *> arr;
+  arr.resize(16);
+  int n = 129;
+  for (int i = 0; i < arr.size(); i++) {
+    arr[i] = ba.allocate(n);
+  }
+  for (int i = 0; i < arr.size(); i++) {
+    ba.deallocate(arr[i], n);
+  }
+}
+int main() {
+  SimpleAllocator_test();
+
+  BuddyAllocator<int>::test();
+  vector<int> sv;
+  sv.reserve(0);
+  cout << sv.capacity() << endl;
+  sv.push_back(0);
+  sv.insert(sv.end(), 0);
+
+  test_BuddyAllocator();
+
+  //BuddyAllocator<int> ba;
+  //for (int i = 1; i < 130; i++) {
+  //  cout <<i<<" "<< ba.index(i) << endl;
+  //}
   return 0;
 }
