@@ -1,0 +1,1 @@
+#define PTRACE_INFORMATION printf("\n"); printf
