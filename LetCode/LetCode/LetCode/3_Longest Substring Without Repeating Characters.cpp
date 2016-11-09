@@ -56,37 +56,73 @@ using namespace std;
 //  }
 //};
 
+//class Solution {
+// public:
+//  int lengthOfLongestSubstring(string s) {
+//    int best = 0;
+//    unordered_map<char, int> m;
+//    int start = 0;
+//    for (int j = 0; j < s.length(); j++) {
+//      auto it = m.find(s[j]);
+//      //auto it = m.lower_bound(s[j]);
+//      if (it==m.end()) {
+//        m.insert(it,std::make_pair(s[j], j + 1));
+//        //m[s[j]] = j + 1;
+//        int len = j - start + 1;
+//        if (len > best) {
+//          best = len;
+//        }
+//      } else {
+//        int start2 = it->second;
+//        it->second = j + 1;
+//        for (int i = start; i < start2-1; i++) {
+//          m.erase(s[i]);
+//          //m[s[i]] = 0;
+//        }
+//        start = start2;
+//      }
+//    }
+//
+//    return best;
+//  }
+//};
+
+//class Solution {
+// public:
+//  int lengthOfLongestSubstring(string s) {
+//    int best = 0;
+//    unordered_map<char, int> m;
+//    int start = 0;
+//    for (int j = 0; j < s.length(); j++) {
+//      auto it = m.find(s[j]);
+//      if (it == m.end()) {
+//        m.insert(it, std::make_pair(s[j], j + 1));
+//      } else {
+//        start = std::max(start, it->second);
+//        it->second = j + 1;
+//      }
+//      best = std::max(best, j - start + 1);
+//    }
+//
+//    return best;
+//  }
+//};
+
 class Solution {
  public:
   int lengthOfLongestSubstring(string s) {
     int best = 0;
-    unordered_map<char, int> m;
+    int m[256] = { 0 };
     int start = 0;
     for (int j = 0; j < s.length(); j++) {
-      auto it = m.find(s[j]);
-      //auto it = m.lower_bound(s[j]);
-      if (it==m.end()) {
-        m.insert(it,std::make_pair(s[j], j + 1));
-        //m[s[j]] = j + 1;
-        int len = j - start + 1;
-        if (len > best) {
-          best = len;
-        }
-      } else {
-        int start2 = it->second;
-        it->second = j + 1;
-        for (int i = start; i < start2-1; i++) {
-          m.erase(s[i]);
-          //m[s[i]] = 0;
-        }
-        start = start2;
-      }
+      start = std::max(start, m[s[j]]);
+      best = std::max(best, j - start + 1);
+      m[s[j]] = j + 1;
     }
 
     return best;
   }
 };
-
 void test1() {
   Solution sln;
   assert(sln.lengthOfLongestSubstring("abcabcbb") == 3);
