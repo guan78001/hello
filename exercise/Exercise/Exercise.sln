@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Exercise", "Exercise\Exercise.vcxproj", "{945CFCED-362A-4C4C-934C-6C7C846F6D1C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenMP_Test", "OpenMP_Test\OpenMP_Test.vcxproj", "{F6224273-3DD9-41E9-A184-1EF312BE3588}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -15,6 +17,10 @@ Global
 		{945CFCED-362A-4C4C-934C-6C7C846F6D1C}.Debug|Win32.Build.0 = Debug|Win32
 		{945CFCED-362A-4C4C-934C-6C7C846F6D1C}.Release|Win32.ActiveCfg = Release|Win32
 		{945CFCED-362A-4C4C-934C-6C7C846F6D1C}.Release|Win32.Build.0 = Release|Win32
+		{F6224273-3DD9-41E9-A184-1EF312BE3588}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F6224273-3DD9-41E9-A184-1EF312BE3588}.Debug|Win32.Build.0 = Debug|Win32
+		{F6224273-3DD9-41E9-A184-1EF312BE3588}.Release|Win32.ActiveCfg = Release|Win32
+		{F6224273-3DD9-41E9-A184-1EF312BE3588}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
