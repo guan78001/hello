@@ -125,6 +125,7 @@ struct BuddyAllocator {
     m_freelist[pos] = p;
   }
 };
+
 template<class T>
 class  SimpleVector {
  public: //iterator
@@ -170,6 +171,7 @@ class  SimpleVector {
 
 
   SimpleVector() :m_array(nullptr), m_last(0), m_capacity(0) {  }
+
   ~SimpleVector() {
     deallocate();
   }
@@ -213,11 +215,13 @@ class  SimpleVector {
         Copy_Backward(begin() + pos, end(), end() + 1);
         *(begin() + pos) = val;
       }
+
       m_last++;
     }
     return begin() + pos;
   }
  private:
+
   void Grow(size_t &capacity) {
     if (capacity == 0) {
       capacity= 1;
@@ -285,6 +289,7 @@ void SimpleVector<T>::resize(size_t len, const T &c) {
   if (len > m_last) {
     if (len < m_capacity) {
       for (iterator it = end(); it < end() + len - m_last; it++) {
+
         Construct(it, c);
       }
     } else {
@@ -311,6 +316,7 @@ void SimpleVector<T>::reserve(size_t len ) {
 
   T *p = allocate(len);
   Copy(begin(), end(), p);
+
   deallocate();
 
   m_array = p;
