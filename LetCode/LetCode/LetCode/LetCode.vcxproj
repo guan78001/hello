@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="19_Remove Nth Node From End of List.cpp" />
+    <ClCompile Include="4_Median of Two Sorted Arrays.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6C6D3C10-20F1-4635-85B7-3878CA5580E3}</ProjectGuid>
