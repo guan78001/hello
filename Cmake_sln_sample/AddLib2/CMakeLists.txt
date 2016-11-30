@@ -1,0 +1,1 @@
+add_library(AddLib2 AddLib2.h AddLib2.cpp)
