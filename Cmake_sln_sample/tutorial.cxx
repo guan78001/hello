@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "AddDLL/AddDLL.h"
 #include "AddLib/AddLib.h"
+#include <windows.h>
 int main (int argc, char *argv[]) {
   printf("sizeof(void*)=%d\n", sizeof(void *));
 
@@ -10,5 +11,9 @@ int main (int argc, char *argv[]) {
 
   AddLib obj2;
   obj2.Print();
+
+  char path[512];
+  GetCurrentDirectory(512, path);
+  printf("path=%s\n", path);
   return 0;
 }
