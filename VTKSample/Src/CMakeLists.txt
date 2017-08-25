@@ -1,0 +1,10 @@
+add_subdirectory(Cylinder)
+add_subdirectory(SmartVolumeMapper)
+add_subdirectory(MinIntensityRendering)
+add_subdirectory(InteractorStyleTerrain)
+add_subdirectory(ReadPLY)
+add_subdirectory(MedicalDemo1)
+add_subdirectory(MedicalDemo2)
+add_subdirectory(MarchingCases)
+
+

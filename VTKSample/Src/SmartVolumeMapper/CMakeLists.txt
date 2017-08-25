@@ -1,0 +1,1 @@
+VTK_Project(SmartVolumeMapper SmartVolumeMapper.cpp)
