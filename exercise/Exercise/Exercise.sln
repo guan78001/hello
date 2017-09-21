@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Exercise", "Exercise\Exerci
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenMP_Test", "OpenMP_Test\OpenMP_Test.vcxproj", "{F6224273-3DD9-41E9-A184-1EF312BE3588}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Regex", "Regex\Regex.vcxproj", "{1E3ECE56-B52C-411F-8D41-4DD8F9BE0B30}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -21,6 +23,10 @@ Global
 		{F6224273-3DD9-41E9-A184-1EF312BE3588}.Debug|Win32.Build.0 = Debug|Win32
 		{F6224273-3DD9-41E9-A184-1EF312BE3588}.Release|Win32.ActiveCfg = Release|Win32
 		{F6224273-3DD9-41E9-A184-1EF312BE3588}.Release|Win32.Build.0 = Release|Win32
+		{1E3ECE56-B52C-411F-8D41-4DD8F9BE0B30}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1E3ECE56-B52C-411F-8D41-4DD8F9BE0B30}.Debug|Win32.Build.0 = Debug|Win32
+		{1E3ECE56-B52C-411F-8D41-4DD8F9BE0B30}.Release|Win32.ActiveCfg = Release|Win32
+		{1E3ECE56-B52C-411F-8D41-4DD8F9BE0B30}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
