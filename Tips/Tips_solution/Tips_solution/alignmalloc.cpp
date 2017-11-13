@@ -12,9 +12,21 @@ void *aligned_malloc(size_t size, size_t align) {
   return amem;
 }
 
+class A {
+ public:
+  A() {
+    printf("A()\n");
+  }
+  ~A() {
+    printf("~A()\n");
+  }
 
+  int n = 0;
+};
 int main() {
+  A *pa = new A[4];
+  delete []pa;
+  return 0;
   void *p = aligned_malloc(17, 8);
   free(((int **)p)[-1]);
-
 }

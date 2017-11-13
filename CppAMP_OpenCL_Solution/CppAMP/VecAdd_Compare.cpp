@@ -19,7 +19,7 @@ struct Timer {
   double m_t0;
   std::string m_info;
 };
-int nTestCount = 100;
+int nTestCount = 1000;
 void StandardMethod(const std::vector<float> &vec_a, const std::vector<float> &vec_b) {
   Timer timer("CPU-Ref");
   const int size = vec_a.size();
@@ -87,7 +87,7 @@ static std::vector<float> generate_data(size_t size) {
 #include <iostream>
 using namespace concurrency;
 
-void CppAmpMethod(std::vector<float> &vec_a, std::vector<float> &vec_b) {
+void CppAmpMethod(const std::vector<float> &vec_a, const std::vector<float> &vec_b) {
   Timer timer("AMP");
   const int size = vec_a.size();
   std::vector<float> vec_sum(size);
@@ -99,7 +99,7 @@ void CppAmpMethod(std::vector<float> &vec_a, std::vector<float> &vec_b) {
   {
     Timer timer("CppAmpMethod_runkernel");
     for (int testCount = 0; testCount < nTestCount; testCount++) {
-
+      //Timer timer("CppAmpMethod_runkernel");
       parallel_for_each(
         // Define the compute domain, which is the set of threads that are created.
         sum.extent,
@@ -167,7 +167,7 @@ const char *helloStr =
   "}"
   ;
 
-int OpenCLMethod_C(const std::vector<float> &va, const std::vector<float> &vb) {
+void OpenCLMethod_C(const std::vector<float> &va, const std::vector<float> &vb) {
   Timer timer("OpenCLMethod_C");
   Opencl_Instance opencl_inst;
   const char *str_kernel[] = { "hello", "add" };
@@ -194,7 +194,7 @@ int OpenCLMethod_C(const std::vector<float> &va, const std::vector<float> &vb) {
     { sizeof(mem_C), (void *) &mem_C },
   };
   for (int test = 0; test < nTestCount; test++) {
-    Timer timer("OpenCLMethod_C_runkernel");
+    //Timer timer("OpenCLMethod_C_runkernel");
     opencl_inst.runKernel(opencl_inst.GetKernel(1), args, sizeof(args) / sizeof(args[0]), 1, global_worksize, local_worksize);
   }
   clEnqueueReadBuffer(opencl_inst.GetCommandQueue(), mem_C, CL_TRUE, 0, data_len, &vc[0], NULL, NULL, NULL);
@@ -209,7 +209,6 @@ int OpenCLMethod_C(const std::vector<float> &va, const std::vector<float> &vb) {
   clReleaseMemObject(mem_A);
   clReleaseMemObject(mem_B);
   clReleaseMemObject(mem_C);
-  return 0;
 }
 int OpenCLMethod(const std::vector<float> &va, const std::vector<float> &vb) {
   Timer timer("OpenCL");
@@ -390,6 +389,30 @@ int main(int argc, char *argv[]) {
 
   //std::cout << "\nOpenMPMethod\n";
   //OpenMPMethod(a, b);
+
+  typedef std::function<void(const std::vector<float> &vec_a, const std::vector<float> &vec_b)> Func;
+  typedef std::pair<Func, std::string> UserPair;
+  std::vector<UserPair> funcs;
+  funcs.push_back(UserPair(CppAmpMethod, "CppAmpMethod"));
+  funcs.push_back(UserPair(CppAmpMethod, "CppAmpMethod"));
+
+  funcs.push_back(UserPair(CppAmpMethod2, "CppAmpMethod2"));
+  funcs.push_back(UserPair(CppAmpMethod2, "CppAmpMethod2"));
+
+  funcs.push_back(UserPair(OpenCLMethod_C, "OpenCLMethod_C"));
+  funcs.push_back(UserPair(OpenCLMethod_C, "OpenCLMethod_C"));
+  std::vector<float> results(funcs.size());
+  for (int i = 0; i < funcs.size(); i++) {
+    double t0 = omp_get_wtime();
+    funcs[i].first(a, b);
+    double t1 = omp_get_wtime();
+    results[i] = t1 - t0;
+  }
+  printf("Result:\n");
+  for (int i = 0; i < funcs.size(); i++) {
+    printf("%s used time %f ms\n", funcs[i].second.c_str(), results[i] * 1000);
+  }
+  return 0;
 
   std::cout << "\nCppAmpMethod\n";
   CppAmpMethod(a, b);
