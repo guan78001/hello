@@ -1,9 +1,18 @@
 #include "AddDLL.h"
 #include "../AddLib/AddLib.h"
 #include "../AddLib2/AddLib2.h"
+#include <windows.h>
 #include <stdio.h>
+
+
 void AddDLL::Print() {
   printf("This is AddDLL::Print\n");
+
+  char path[512];
+  HMODULE hMod = GetModuleHandle(("OpenCL.dll"));
+  GetModuleFileName(hMod, path, 511);
+  printf("path=%s\n", path);
+
   AddLib obj1;
   obj1.Print();
 

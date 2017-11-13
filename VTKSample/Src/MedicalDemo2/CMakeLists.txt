@@ -1,0 +1,1 @@
+VTK_Project(MedicalDemo2 MedicalDemo2.cpp)

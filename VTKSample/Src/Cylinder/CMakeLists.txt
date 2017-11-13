@@ -1,0 +1,3 @@
+#VTK_Project(CylinderRenderingProperties CylinderRenderingProperties.cpp)
+add_executable(CylinderRenderingProperties CylinderRenderingProperties.cpp)
+target_link_libraries(CylinderRenderingProperties ${VTK_LIB})
