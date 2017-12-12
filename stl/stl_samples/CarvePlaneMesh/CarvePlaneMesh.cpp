@@ -129,8 +129,12 @@ void GeneratePlaneMesh(const BMP &bmp, Mesh &mesh) {
     for (int w = 0; w < width; w++) {
       int tri1[3];
       int tri2[3];
-      //Note: Image coordinate x->, y: up to down, mesh coordiante: x->, y: down to up.
-      //inverse triangle here to get front normal.
+      /*
+      ^
+      Y
+      1--0
+      2--3 ->X
+      */
       tri1[2] = h * (width + 1) + w;
       tri1[1] = (h + 1) * (width + 1) + w;
       tri1[0] = (h + 1) * (width + 1) + w + 1;
