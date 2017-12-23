@@ -249,13 +249,13 @@ namespace FontTessellation
                 for(int id=idStart; id<idEnd-2; id+=2)
                 {
                     //Add two triangles
-                    //int [] arr=new int[6]{id,id+1,id+3,id,id+3,id+2};
-                    int[] arr = new int[6] { id, id + 3, id + 1, id, id + 2, id + 3};
+                    int [] arr=new int[6]{id,id+1,id+3,id,id+3,id+2};
+                    //int[] arr = new int[6] { id, id + 3, id + 1, id, id + 2, id + 3};
                     AddTriangles(ref triangles_xyz_array, points_array, arr);
                 }
                 //Connect idStart and idEnd, add two triangles
-                //int[] arr_last = new int[6] { idEnd - 2, idEnd - 1, idStart + 1, idEnd - 2, idStart + 1, idStart };
-                int[] arr_last = new int[6] { idEnd - 2, idStart + 1, idEnd - 1, idEnd - 2, idStart, idStart + 1 };
+                int[] arr_last = new int[6] { idEnd - 2, idEnd - 1, idStart + 1, idEnd - 2, idStart + 1, idStart };
+                //int[] arr_last = new int[6] { idEnd - 2, idStart + 1, idEnd - 1, idEnd - 2, idStart, idStart + 1 };
                 AddTriangles(ref triangles_xyz_array, points_array, arr_last);
             }
         }
@@ -388,7 +388,20 @@ namespace FontTessellation
 
                 P2T.Triangulate(polygonSet_bottom);
                 P2T.Triangulate(polygonSet_base);
-                CarveMesh(polygonSet_bottom, polygonSet_base, points_list, "d:\\temp\\triangles_all2.stl");
+
+                List<double> triangels = new List<double>();
+                double z_bottom = -20;
+                double z_base = 0;
+                FromPolygonSetToTriangles(polygonSet_bottom, z_bottom, triangels);
+                FromPolygonSetToTriangles(polygonSet_base, z_base, triangels);
+                GetTrianglesBetweenTwoZPlane(points_list, z_base, z_bottom, triangels);
+
+                //reverse y
+                for (int i = 1; i < triangels.Count; i += 3)
+                {
+                    triangels[i] = max[1] - triangels[i];
+                }
+                WriteStl(triangels, "d:\\temp\\triangles_all2.stl");
             }
             try
             {
@@ -500,28 +513,25 @@ namespace FontTessellation
             }
             return polygonList_base;
         }
-        private void CarveMesh(PolygonSet polygonSet_bottom, PolygonSet polygonSet_base, List<List<PolygonPoint>> points_list,string filename)
-        {
-            List<double> triangels = new List<double>();
-            double z_bottom = 10;
-            double z_base = 0;
-            FromPolygonSetToTriangles(polygonSet_bottom, z_bottom,  triangels);
-            FromPolygonSetToTriangles(polygonSet_base, z_base,  triangels);
-            GetTrianglesBetweenTwoZPlane(points_list, z_base, z_bottom, triangels);
-            WriteStl(triangels, filename);
-        }
+
         private void FromPolygonSetToTriangles(PolygonSet polygonSet2,double z, List<double> triangels)
         {
             foreach (var pol in polygonSet2.Polygons)
             {
                 foreach (var tri in pol.Triangles)
                 {
-                    for (int i = 0; i < 3; i++)
-                    {
-                        triangels.Add(tri.Points[i].X);
-                        triangels.Add(tri.Points[i].Y);
-                        triangels.Add(z);
-                    }
+                    //change orientation due to y-axis was reversed from text to mesh coordinate
+                    triangels.Add(tri.Points[0].X);
+                    triangels.Add(tri.Points[0].Y);
+                    triangels.Add(z);
+
+                    triangels.Add(tri.Points[2].X);
+                    triangels.Add(tri.Points[2].Y);
+                    triangels.Add(z);
+
+                    triangels.Add(tri.Points[1].X);
+                    triangels.Add(tri.Points[1].Y);
+                    triangels.Add(z);
                 }
             }
         }
@@ -536,11 +546,9 @@ namespace FontTessellation
                 sw.WriteLine("  facet normal 0 0 -1");
                 sw.WriteLine("    outer loop");
                 
-                int []order=new int[]{1,0,2};//reverse triangle orientation
                 for(int j=0; j<3; j++)
                 {
-                    int orderId = order[j];
-                    sw.WriteLine("      vertex  {0} {1} {2}", triangles_xyz_array[i + 3 * orderId], triangles_xyz_array[i + 3 * orderId + 1], triangles_xyz_array[i + 3 * orderId + 2]);
+                    sw.WriteLine("      vertex  {0} {1} {2}", triangles_xyz_array[i + 3 * j], triangles_xyz_array[i + 3 * j + 1], triangles_xyz_array[i + 3 * j + 2]);
                 }
                 sw.WriteLine("    endloop");
                 sw.WriteLine("  endfacet");
