@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stl_compare", "stl_compare\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CacheLinePerformance", "CacheLinePerformance\CacheLinePerformance.vcxproj", "{619E751F-8B4E-44F7-A939-B2160A5DF1C5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CarvePlaneMesh", "CarvePlaneMesh\CarvePlaneMesh.vcxproj", "{7C16E3E3-CE19-4524-885A-6AEBC7F765F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -39,6 +41,10 @@ Global
 		{619E751F-8B4E-44F7-A939-B2160A5DF1C5}.Debug|Win32.Build.0 = Debug|Win32
 		{619E751F-8B4E-44F7-A939-B2160A5DF1C5}.Release|Win32.ActiveCfg = Release|Win32
 		{619E751F-8B4E-44F7-A939-B2160A5DF1C5}.Release|Win32.Build.0 = Release|Win32
+		{7C16E3E3-CE19-4524-885A-6AEBC7F765F2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7C16E3E3-CE19-4524-885A-6AEBC7F765F2}.Debug|Win32.Build.0 = Debug|Win32
+		{7C16E3E3-CE19-4524-885A-6AEBC7F765F2}.Release|Win32.ActiveCfg = Release|Win32
+		{7C16E3E3-CE19-4524-885A-6AEBC7F765F2}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
