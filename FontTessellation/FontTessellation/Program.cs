@@ -30,7 +30,8 @@ namespace FontTessellation
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new TesselationDemo());
+            //Application.Run(new TesselationDemo());
+            Application.Run(new TextToMesh());
         }
     }
 }
