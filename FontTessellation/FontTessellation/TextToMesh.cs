@@ -46,7 +46,8 @@ namespace FontTessellation
             {
                 List<List<PolygonPoint>> points_list = new List<List<PolygonPoint>>();
                 var polygonListofText = GeneratePolygonsFromGlyph(fx, ffamilly, fstyle.Value, text, ref points_list);
-
+                WritePointsToFile(points_list, "d:\\temp\\points_list.txt");
+                WritePointsToBDMFile(points_list, "d:\\temp\\points_list.bdm");
                 double[] min;
                 double[] max;
                 GetBoundingBox(ref points_list, out min, out max);
@@ -75,7 +76,38 @@ namespace FontTessellation
                 WriteStlBinary(triangels, filename);
             }
         }
-
+        private void WritePointsToFile(List<List<PolygonPoint>> points_list,string filename)
+        {
+            FileStream fs = new FileStream(filename, FileMode.Create);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.WriteLine(points_list.Count);
+            for (int i = 0; i < points_list.Count; i++)
+            {
+                sw.WriteLine(points_list[i].Count);
+                for (int j = 0; j < points_list[i].Count; j++)
+                {
+                    sw.WriteLine("{0} {1}", points_list[i][j].X, points_list[i][j].Y);
+                }
+            }
+            sw.Close();
+        }
+        private void WritePointsToBDMFile(List<List<PolygonPoint>> points_list, string filename)
+        {
+            FileStream fs = new FileStream(filename, FileMode.Create);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.WriteLine("type \"2D\"");
+            
+            for (int i = 0; i < points_list.Count; i++)
+            {
+                sw.WriteLine(points_list[i].Count);
+                for (int j = 0; j < points_list[i].Count; j++)
+                {
+                    sw.WriteLine("{0} {1}", points_list[i][j].X, points_list[i][j].Y);
+                }
+                sw.WriteLine();
+            }
+            sw.Close();
+        }
         static List<Polygon> GeneratePolygonsFromGlyph(Graphics fx,
             FontFamily fontFamily, FontStyle style,
             string glyph, ref List<List<PolygonPoint>> points_list)
