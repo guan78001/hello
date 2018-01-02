@@ -47,12 +47,13 @@ namespace FontTessellation
                 List<List<PolygonPoint>> points_list = new List<List<PolygonPoint>>();
                 var polygonListofText = GeneratePolygonsFromGlyph(fx, ffamilly, fstyle.Value, text, ref points_list);
                 WritePointsToFile(points_list, "d:\\temp\\points_list.txt");
-                WritePointsToBDMFile(points_list, "d:\\temp\\points_list.bdm");
+                //WritePointsToBDMFile(points_list, "d:\\temp\\points_list.bdm");
+
+                var polygonListofBase = Copy(polygonListofText);
                 double[] min;
                 double[] max;
                 GetBoundingBox(ref points_list, out min, out max);
-
-                var polygonListofBase = PolygonsInBox(ref polygonListofText, min, max);
+                polygonListofBase.Add(new Polygon(PolygonPointsOfRect(min, max)));
 
                 var polygonSetOfText = CreateSetFromList(polygonListofText);
                 var polygonSetOfBase = CreateSetFromList(polygonListofBase);
@@ -185,6 +186,7 @@ namespace FontTessellation
                 }
             }
         }
+
         private List<Polygon> PolygonsInBox(ref List<Polygon> polygonList_bottom, double[] min, double[] max)
         {
             var polygonList_base = new List<Polygon>();
@@ -192,20 +194,30 @@ namespace FontTessellation
             {
                 polygonList_base.Add(polygonList_bottom[i]);
             }
+            polygonList_base.Add(new Polygon(PolygonPointsOfRect(min, max)));
+            return polygonList_base;
+        }
+        private List<Polygon> Copy(List<Polygon> polygonList_bottom)
+        {
+            var polygonList_base = new List<Polygon>();
+            for (int i = 0; i < polygonList_bottom.Count; i++)
             {
-                double x1 = Math.Max(0, min[0] - 10), y1 = Math.Max(0, min[1] - 10), x2 = max[0] + 10, y2 = max[1] + 10;
-                //double x1 = 0, y1 = 0, x2 = 650, y2 = 350;
-                var points = new List<PolygonPoint>();
-                points.Add(new PolygonPoint(x1, y1));
-                points.Add(new PolygonPoint(x2, y1));
-                points.Add(new PolygonPoint(x2, y2));
-                points.Add(new PolygonPoint(x1, y2));
-
-                polygonList_base.Add(new Polygon(points));
+                polygonList_base.Add(polygonList_bottom[i]);
             }
             return polygonList_base;
         }
+        private List<PolygonPoint> PolygonPointsOfRect(double[] min, double[] max)
+        {
+            double x1 = Math.Max(0, min[0] - 10), y1 = Math.Max(0, min[1] - 10), x2 = max[0] + 10, y2 = max[1] + 10;
+            //double x1 = 0, y1 = 0, x2 = 650, y2 = 350;
+            var points = new List<PolygonPoint>();
+            points.Add(new PolygonPoint(x1, y1));
+            points.Add(new PolygonPoint(x2, y1));
+            points.Add(new PolygonPoint(x2, y2));
+            points.Add(new PolygonPoint(x1, y2));
 
+            return points;
+        }
         private void FromPolygonSetToTriangles(PolygonSet polygonSet2, double z, List<double> triangels)
         {
             foreach (var pol in polygonSet2.Polygons)
