@@ -18,22 +18,32 @@ namespace FontTessellation
         public TextToMesh()
         {
             InitializeComponent();
+            this.comboBox1.TextChanged += comboBox1_TextChanged;
+            RefreshFontList();
         }
+
+        void comboBox1_TextChanged(object sender, EventArgs e)
+        {
+            string fontString = comboBox1.Text;
+            this.textBox1.Font = new System.Drawing.Font(fontString, 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             string text = this.textBox1.Text;
-            string filename = "d:\\temp\\TextMesh.stl";
-            double zDepth =-10; // millimeter
+            string filename = "TextMesh.stl";
+            //double zDepth =-10; // millimeter
+            double zDepth = Convert.ToDouble(this.textBox2.Text);
             GenMesh(text, filename, zDepth);
-            this.Close();
+            //this.Close();
         }
         private void GenMesh(string text,string filename,double zDepth)
         {
             Graphics g = this.CreateGraphics();
             var fx = g;
 
-            var ffamilly = new FontFamily("华文楷体");
-            //var ffamilly = new FontFamily(this.textBox1.Font.Name);
+            //var ffamilly = new FontFamily("华文楷体");
+            var ffamilly = new FontFamily(this.textBox1.Font.Name);
             FontStyle? fstyle = null;
             foreach (var style in new[] { FontStyle.Regular, FontStyle.Bold, FontStyle.Italic, FontStyle.Underline, FontStyle.Strikeout })
             {
@@ -46,7 +56,7 @@ namespace FontTessellation
             {
                 List<List<PolygonPoint>> points_list = new List<List<PolygonPoint>>();
                 var polygonListofText = GeneratePolygonsFromGlyph(fx, ffamilly, fstyle.Value, text, ref points_list);
-                WritePointsToFile(points_list, "d:\\temp\\points_list.txt");
+                //WritePointsToFile(points_list, "d:\\temp\\points_list.txt");
                 //WritePointsToBDMFile(points_list, "d:\\temp\\points_list.bdm");
 
                 var polygonListofBase = Copy(polygonListofText);
@@ -208,7 +218,8 @@ namespace FontTessellation
         }
         private List<PolygonPoint> PolygonPointsOfRect(double[] min, double[] max)
         {
-            double x1 = Math.Max(0, min[0] - 10), y1 = Math.Max(0, min[1] - 10), x2 = max[0] + 10, y2 = max[1] + 10;
+            //double x1 = Math.Max(0, min[0] - 10), y1 = Math.Max(0, min[1] - 10), x2 = max[0] + 10, y2 = max[1] + 10;
+            double x1 = min[0] - 10, y1 = min[1] - 10, x2 = max[0] + 10, y2 = max[1] + 10;
             //double x1 = 0, y1 = 0, x2 = 650, y2 = 350;
             var points = new List<PolygonPoint>();
             points.Add(new PolygonPoint(x1, y1));
@@ -485,5 +496,27 @@ namespace FontTessellation
                 triangles_xyz_array.Add(points_array[3 * arr[j] + 2]);
             }
         }
+
+        void RefreshFontList()
+        {
+            SuspendLayout();
+
+            // We need a Graphics to get the list of font famillies
+            using (var tmp = new Bitmap(10, 10))
+            using (var gfx = Graphics.FromImage(tmp))
+            {
+                this.comboBox1.Items.Clear();
+                foreach (var family in FontFamily.GetFamilies(gfx))
+                {
+                    comboBox1.Items.Add(family.Name);
+                }
+            }
+            comboBox1.SelectedIndex=0;
+            string fontString = comboBox1.Items[0].ToString();
+            this.textBox1.Font = new System.Drawing.Font(fontString, 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+
+            ResumeLayout();
+        }
     }
+
 }
