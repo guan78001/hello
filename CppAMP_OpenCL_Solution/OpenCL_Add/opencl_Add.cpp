@@ -4,26 +4,54 @@
 #define CL_USE_DEPRECATED_OPENCL_2_0_APIS
 #include <CL/opencl.h>
 
-// OpenCL kernel. Each work item takes care of one element of c
-const char *kernelSource = "\n" \
-                           "#pragma OPENCL EXTENSION cl_khr_fp64 : enable                    \n" \
-                           "__kernel void vecAdd(  __global double *a,                       \n" \
-                           "                       __global double *b,                       \n" \
-                           "                       __global double *c,                       \n" \
-                           "                       const unsigned int n)                    \n" \
-                           "{                                                               \n" \
-                           "    //Get our global thread ID                                  \n" \
-                           "    int id = get_global_id(0);                                  \n" \
-                           "                                                                \n" \
-                           "    //Make sure we do not go out of bounds                      \n" \
-                           "    if (id < n)                                                 \n" \
-                           "        c[id] = a[id] + b[id];                                  \n" \
-                           "}                                                               \n" \
-                           "\n";
+#define KERNEL_CODE(...) #__VA_ARGS__
+
+const char *kernelSource = KERNEL_CODE(
+__kernel void vecAdd(__global double *a, __global double *b, __global double *c, const unsigned int n) {
+  //Get our global thread ID
+  int id = get_global_id(0);
+
+  //Make sure we do not go out of bounds
+  if (id < n) c[id] = a[id] + b[id];
+}
+
+__kernel void upSample(__global double *src, __global double *dst, int width, int height) {
+  int id = get_global_id(0);
+
+  for (int i = 0; i < height; i++) {
+    double val = src[width * i + id];
+    dst[2 * width * i + id] = val;
+    dst[2 * width * i + width + id] = val;
+  }
+}
+
+__kernel void upSample2(__global double *src, __global double *dst, int width, int height) {
+  int id = get_global_id(0);
+  __local float temp[128];
+  int lid = get_local_id(0);
+  for (int i = 0; i < height; i++) {
+    temp[lid] = src[width * i + id];
+    barrier(CLK_LOCAL_MEM_FENCE);
+    dst[2 * width * i + id] = temp[lid];
+    dst[2 * width * i + width + id] = temp[lid];
+  }
+}
+__kernel void downsample(__global double *src, __global double *dst, int width, int height) {
+  int id = get_global_id(0);
+
+  for (int i = 0; i < height; i++) {
+    dst[width * i + id] = src[2 * width * i + id];
+  }
+}
+
+                           );
+
+// OpenCL kernel. Each work item takes care of one element of
+
 
 int main(int argc, char *argv[]) {
   // Length of vectors
-  unsigned int n = 128;
+  unsigned int n = 512;
 
   // Host input vectors
   double *h_a;
@@ -36,7 +64,7 @@ int main(int argc, char *argv[]) {
   cl_mem d_b;
   // Device output buffer
   cl_mem d_c;
-
+  cl_mem d_d;
   cl_platform_id cpPlatform;        // OpenCL platform
   cl_device_id device_id;           // device ID
   cl_context context;               // context
@@ -57,7 +85,7 @@ int main(int argc, char *argv[]) {
   for (i = 0; i < n; i++) {
 //   h_a[i] = sinf(i) * sinf(i);
 //   h_b[i] = cosf(i) * cosf(i);
-    h_a[i] = 1;
+    h_a[i] = 2;
     h_b[i] = 1;
   }
   {
@@ -104,7 +132,83 @@ int main(int argc, char *argv[]) {
   d_a = clCreateBuffer(context, CL_MEM_READ_ONLY, bytes, NULL, NULL);
   d_b = clCreateBuffer(context, CL_MEM_READ_ONLY, bytes, NULL, NULL);
   d_c = clCreateBuffer(context, CL_MEM_WRITE_ONLY, bytes, NULL, NULL);
+  d_d = clCreateBuffer(context, CL_MEM_WRITE_ONLY, bytes, NULL, NULL);
+  {
+    int w = 64;
+    int h = 3;
+    size_t bytes = w * h * sizeof(double);
 
+    //input
+    for (int j = 0; j < h; j++) {
+      for (int i = 0; i < w; i++) {
+        h_a[j * w + i] = j * w + i;
+      }
+    }
+
+    printf("input:\n");
+    for (int j = 0; j < h; j++) {
+      for (int i = 0; i < w; i++) {
+        printf("%g ", h_a[j * w + i]);
+      }
+      printf("\n");
+    }
+    cl_kernel kernel = clCreateKernel(program, "upSample", &err);
+    clEnqueueWriteBuffer(queue, d_a, CL_TRUE, 0,
+                         bytes, h_a, 0, NULL, NULL);
+
+    clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_a);
+    clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_c);
+    clSetKernelArg(kernel, 2, sizeof(int), &w);
+    clSetKernelArg(kernel, 3, sizeof(int), &h);
+
+    // Execute the kernel over the entire range of the data set
+    size_t globalSize = w, localSize = 32;
+    err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, &localSize,
+                                 0, NULL, NULL);
+    // Wait for the command queue to get serviced before reading back results
+    clFinish(queue);
+
+    // Read the results from the device
+    clEnqueueReadBuffer(queue, d_c, CL_TRUE, 0,
+                        2 * bytes, h_c, 0, NULL, NULL);
+
+    printf("output_upsample:\n");
+    for (int j = 0; j < 2 * h; j++) {
+      for (int i = 0; i < w; i++) {
+        printf("%g ", h_c[j * w + i]);
+      }
+      printf("\n");
+    }
+    clReleaseKernel(kernel);
+
+    {
+      //downsample
+      kernel = clCreateKernel(program, "downsample", &err);
+      clSetKernelArg(kernel, 0, sizeof(cl_mem), &d_c);
+      clSetKernelArg(kernel, 1, sizeof(cl_mem), &d_d);
+      clSetKernelArg(kernel, 2, sizeof(int), &w);
+      clSetKernelArg(kernel, 3, sizeof(int), &h);
+
+      // Execute the kernel over the entire range of the data set
+      size_t globalSize = w, localSize = 32;
+      err = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &globalSize, &localSize,
+                                   0, NULL, NULL);
+      // Wait for the command queue to get serviced before reading back results
+      clFinish(queue);
+      clReleaseKernel(kernel);
+      // Read the results from the device
+      clEnqueueReadBuffer(queue, d_d, CL_TRUE, 0,
+                          bytes, h_c, 0, NULL, NULL);
+
+      printf("output_downsample:\n");
+      for (int j = 0; j < h; j++) {
+        for (int i = 0; i < w; i++) {
+          printf("%g ", h_c[j * w + i]);
+        }
+        printf("\n");
+      }
+    }
+  }
   // Write our data set into the input array in device memory
   err = clEnqueueWriteBuffer(queue, d_a, CL_TRUE, 0,
                              bytes, h_a, 0, NULL, NULL);
