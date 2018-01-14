@@ -106,8 +106,8 @@ void GeneratePlaneMesh(const BMP &bmp, Mesh &mesh) {
   int cn = bmp.channel;
   unsigned char *data = bmp.data;
 
-  float pixelLength = 0.1f;
-  float zDepth = -1.0f;
+  float pixelLength = 0.05f;
+  float zDepth = -0.1f;
 
   //fill points and carve.
   for (int h = 0; h <= height; h++) {
