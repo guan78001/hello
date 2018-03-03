@@ -12,6 +12,23 @@ using namespace std;
 int
 main (int argc, char **argv) {
   PointCloud<PointXYZ>::Ptr cloud (new PointCloud<PointXYZ>);
+  if (argc<2) {
+    cerr << "Please input cloud file name.\n";
+    return -1;
+  }
+  //{
+  //  pcl::PCLPointCloud2 clod;
+  //  pcl::PLYReader reader;
+  //  reader.read(argv[1], clod);
+  //  pcl::PCDWriter writer;
+  //  writer.writeASCII("mesh.pcd", clod);
+  //  return 0;
+  //}
+
+  //if (io::loadPLYFile(argv[1], *cloud)==-1) {
+  //  cout << "ERROR: couldn't find file" << endl;
+  //  return (1);
+  //}
 
   if (io::loadPCDFile<PointXYZ> (argv[1], *cloud) == -1) {
     cout << "ERROR: couldn't find file" << endl;

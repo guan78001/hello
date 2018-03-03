@@ -7,7 +7,7 @@ project(pcl-matching_cube)
 # include_directories(${PCL_INCLUDE_DIRS})
 # link_directories(${PCL_LIBRARY_DIRS})
 # add_definitions(${PCL_DEFINITIONS})
-set(3RDPARTY_DIR "D:/git_clone/D3DCamera_cs3600/D3DCamera/3rdparty")
+set(3RDPARTY_DIR "D:/git_clone/cs3600/D3DCamera/3rdparty")
 set(SHARE_ROOT "${3RDPARTY_DIR}/share-msvc-vc12-x64_dll")
 
 if(CMAKE_GENERATOR MATCHES "Win64")
