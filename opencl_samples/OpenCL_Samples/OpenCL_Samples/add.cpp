@@ -9,19 +9,24 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <vector>
 using namespace std;
-
+#define KERNEL_CODE(...) #__VA_ARGS__
 const char*  helloStr = "__kernel void "
                         "hello(void) "
                         "{ "
                         "  "
                         "} ";
-const char*  helloStr2 = "__kernel void "
-                         "hello2(void) "
-                         "{ "
-                         "  "
-                         "} ";
 
+const char*  vecAdd  = KERNEL_CODE(
+__kernel void vecAdd(__global double *a, __global double *b, __global double *c, /*const unsigned */int n) {
+  //Get our global thread ID
+  int id = get_global_id(0);
+
+  //Make sure we do not go out of bounds
+  if (id < n) c[id] = a[id] + b[id];
+}
+                       );
 
 int
 main(void) {
@@ -55,24 +60,83 @@ main(void) {
 
     cl::Program::Sources source(1,
                                 std::make_pair(helloStr, strlen(helloStr)));
-    source.push_back(std::make_pair(helloStr2, strlen(helloStr2)));
+    source.push_back(std::make_pair(vecAdd, strlen(vecAdd)));
 
     cl::Program program_ = cl::Program(context, source);
     program_.build(devices);
 
-    cl::Kernel kernel(program_, "hello", &err);
+    if(1) {
 
-    cl::Event event;
-    cl::CommandQueue queue(context, devices[0], 0, &err);
-    queue.enqueueNDRangeKernel(
-      kernel,
-      cl::NullRange,
-      cl::NDRange(4, 4),
-      cl::NullRange,
-      NULL,
-      &event);
+      const int N = 1024;
+      size_t bytes = N * sizeof(double);
 
-    event.wait();
+      //1.define GPU buffer memory
+      cl::Buffer buf_a(context,CL_MEM_READ_WRITE,bytes,0,0);
+      cl::Buffer buf_b(context, CL_MEM_READ_WRITE, bytes, 0, 0);
+      cl::Buffer buf_c(context, CL_MEM_READ_WRITE, bytes, 0, 0);
+
+      //2.set kernel
+      cl::Kernel kernel(program_, "vecAdd", &err);
+      kernel.setArg(0, buf_a);
+      kernel.setArg(1, buf_b);
+      kernel.setArg(2, buf_c);
+      kernel.setArg(3, N);
+
+      //3.define CPU buffer memory
+      std::vector<double> va(N);
+      std::vector<double> vb(N);
+      std::vector<double> vc(N);
+      for (int i = 0; i < N; i++) {
+        va[i] = 1;
+        vb[i] = 2;
+      }
+
+      //4.define event and queue
+      cl::Event event;
+      cl::CommandQueue queue(context, devices[0], 0, &err);
+
+      //5.copy data from CPU to GPU
+      queue.enqueueWriteBuffer(buf_a, false, 0, bytes, &va[0]);
+      queue.enqueueWriteBuffer(buf_b, false, 0, bytes, &vb[0]);
+
+      //6.run kernel
+      queue.enqueueNDRangeKernel(
+        kernel,
+        cl::NullRange,
+        cl::NDRange(N),
+        cl::NullRange,
+        NULL,
+        &event);
+
+      //7.read result from GPU
+      queue.enqueueReadBuffer(buf_c, false, 0, bytes, &vc[0], NULL, &event);
+      //event.wait();
+
+      //8.compare result
+      bool isSame = true;
+      for (int i = 0; i < N; i++) {
+        if (va[i]+vb[i]!=vc[i]) {
+          cout << "different at i=" << i << endl;
+          isSame = false;
+          break;
+        }
+      }
+      cout << "isSame=" << isSame << endl;
+    }
+    {
+      cl::Kernel kernel(program_, "hello", &err);
+
+      cl::Event event;
+      cl::CommandQueue queue(context, devices[0], 0, &err);
+      queue.enqueueNDRangeKernel(
+        kernel,
+        cl::NullRange,
+        cl::NDRange(4, 4),
+        cl::NullRange,
+        NULL,
+        &event);
+      event.wait();
+    }
 
   } catch (cl::Error err) {
     std::cerr
