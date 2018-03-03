@@ -12,11 +12,6 @@
 #include <vector>
 using namespace std;
 #define KERNEL_CODE(...) #__VA_ARGS__
-const char*  helloStr = "__kernel void "
-                        "hello(void) "
-                        "{ "
-                        "  "
-                        "} ";
 
 const char*  vecAdd  = KERNEL_CODE(
 __kernel void vecAdd(__global double *a, __global double *b, __global double *c, /*const unsigned */int n) {
@@ -58,15 +53,14 @@ main(void) {
 
     std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
 
-    cl::Program::Sources source(1,
-                                std::make_pair(helloStr, strlen(helloStr)));
+    cl::Program::Sources source;
     source.push_back(std::make_pair(vecAdd, strlen(vecAdd)));
 
     cl::Program program_ = cl::Program(context, source);
     program_.build(devices);
 
-    if(1) {
-
+    //execute kernel.
+    {
       const int N = 1024;
       size_t bytes = N * sizeof(double);
 
@@ -110,7 +104,7 @@ main(void) {
 
       //7.read result from GPU
       queue.enqueueReadBuffer(buf_c, false, 0, bytes, &vc[0], NULL, &event);
-      //event.wait();
+      event.wait();
 
       //8.compare result
       bool isSame = true;
@@ -123,21 +117,6 @@ main(void) {
       }
       cout << "isSame=" << isSame << endl;
     }
-    {
-      cl::Kernel kernel(program_, "hello", &err);
-
-      cl::Event event;
-      cl::CommandQueue queue(context, devices[0], 0, &err);
-      queue.enqueueNDRangeKernel(
-        kernel,
-        cl::NullRange,
-        cl::NDRange(4, 4),
-        cl::NullRange,
-        NULL,
-        &event);
-      event.wait();
-    }
-
   } catch (cl::Error err) {
     std::cerr
         << "ERROR: "
