@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="map_sample.cpp" />
+    <ClCompile Include="unique_ptr.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0BDD4F8A-C98E-4360-87DD-8CFAC600516B}</ProjectGuid>
