@@ -1,4 +1,7 @@
 add_subdirectory(Cylinder)
+add_subdirectory(DynamicRender)
+add_subdirectory(KeypressCallback)
+add_subdirectory(KeypressEvents)
 add_subdirectory(SmartVolumeMapper)
 add_subdirectory(MinIntensityRendering)
 add_subdirectory(InteractorStyleTerrain)
