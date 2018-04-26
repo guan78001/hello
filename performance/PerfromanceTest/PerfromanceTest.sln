@@ -15,6 +15,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileOp", "FileOp\FileOp.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MathTest", "MathTest\MathTest.vcxproj", "{AC0C9511-B095-402F-8E9C-5236F2FDF7CD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestLocker", "TestLocker\TestLocker.vcxproj", "{B0DD184C-434F-49D9-9F0F-7F84C6B60BA0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win32Sync", "Win32Sync\Win32Sync.vcxproj", "{95C8FE67-1573-4D0A-B0B3-7E23F5DC87BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -61,6 +65,18 @@ Global
 		{AC0C9511-B095-402F-8E9C-5236F2FDF7CD}.Release|Win32.ActiveCfg = Release|Win32
 		{AC0C9511-B095-402F-8E9C-5236F2FDF7CD}.Release|Win32.Build.0 = Release|Win32
 		{AC0C9511-B095-402F-8E9C-5236F2FDF7CD}.Release|x64.ActiveCfg = Release|Win32
+		{B0DD184C-434F-49D9-9F0F-7F84C6B60BA0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B0DD184C-434F-49D9-9F0F-7F84C6B60BA0}.Debug|Win32.Build.0 = Debug|Win32
+		{B0DD184C-434F-49D9-9F0F-7F84C6B60BA0}.Debug|x64.ActiveCfg = Debug|Win32
+		{B0DD184C-434F-49D9-9F0F-7F84C6B60BA0}.Release|Win32.ActiveCfg = Release|Win32
+		{B0DD184C-434F-49D9-9F0F-7F84C6B60BA0}.Release|Win32.Build.0 = Release|Win32
+		{B0DD184C-434F-49D9-9F0F-7F84C6B60BA0}.Release|x64.ActiveCfg = Release|Win32
+		{95C8FE67-1573-4D0A-B0B3-7E23F5DC87BD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{95C8FE67-1573-4D0A-B0B3-7E23F5DC87BD}.Debug|Win32.Build.0 = Debug|Win32
+		{95C8FE67-1573-4D0A-B0B3-7E23F5DC87BD}.Debug|x64.ActiveCfg = Debug|Win32
+		{95C8FE67-1573-4D0A-B0B3-7E23F5DC87BD}.Release|Win32.ActiveCfg = Release|Win32
+		{95C8FE67-1573-4D0A-B0B3-7E23F5DC87BD}.Release|Win32.Build.0 = Release|Win32
+		{95C8FE67-1573-4D0A-B0B3-7E23F5DC87BD}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
