@@ -11,6 +11,6 @@ add_subdirectory(MedicalDemo2)
 add_subdirectory(MarchingCases)
 add_subdirectory(ObserverMemberFunction)
 add_subdirectory(TextMesh)
+add_subdirectory(UserEvent)
 add_subdirectory(WritePLY)
 add_subdirectory(TestTransformPolyDataFilter)
-
