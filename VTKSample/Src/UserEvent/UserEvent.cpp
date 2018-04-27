@@ -14,12 +14,18 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 #include <vtkRenderWindowInteractor.h>
 
 #include "vtkTestFilter.h"
-
+#include <thread>
 static void CallbackFunction(vtkObject *caller,
                              long unsigned int eventId,
                              void *clientData,
                              void *callData );
 
+static void Hello(vtkObject *caller,
+                  long unsigned int eventId,
+                  void *clientData,
+                  void *callData) {
+  cout << "Hello" << endl;
+}
 int main(int, char *[]) {
   // Create a renderer, render window, and interactor
   vtkSmartPointer<vtkRenderer> renderer =
@@ -41,11 +47,24 @@ int main(int, char *[]) {
 
   filter->Update();
 
-  filter->InvokeEvent(filter->RefreshEvent, NULL);
+  std::thread th(
+  [&]() {
+    //
+    auto cmd = vtkSmartPointer<vtkCallbackCommand>::New();
+    cmd->SetCallback(Hello);
+    renderWindowInteractor->AddObserver("hello", cmd);
+    for (int i = 0; i < 10; i++) {
+      renderWindowInteractor->InvokeEvent("hello");
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+  }
+  );
 
+  //trigger user event.
+  filter->InvokeEvent(filter->RefreshEvent, NULL);
   renderWindow->Render();
   renderWindowInteractor->Start();
-
+  th.join();
   return EXIT_SUCCESS;
 }
 
