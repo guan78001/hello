@@ -24,8 +24,17 @@ static void Hello(vtkObject *caller,
                   long unsigned int eventId,
                   void *clientData,
                   void *callData) {
-  cout << "Hello" << endl;
+  cout << "Hello " << std::this_thread::get_id() << endl;
 }
+class My {
+ public:
+  static void Hello(vtkObject *caller,
+                    long unsigned int eventId,
+                    void *clientData,
+                    void *callData) {
+    cout << "My Hello. " << std::this_thread::get_id() << endl;
+  }
+};
 int main(int, char *[]) {
   // Create a renderer, render window, and interactor
   vtkSmartPointer<vtkRenderer> renderer =
@@ -45,31 +54,37 @@ int main(int, char *[]) {
   callback->SetCallback(CallbackFunction );
   filter->AddObserver(filter->RefreshEvent, callback);
 
+  filter->Test();
   filter->Update();
 
-  std::thread th(
-  [&]() {
-    //
-    auto cmd = vtkSmartPointer<vtkCallbackCommand>::New();
-    cmd->SetCallback(Hello);
-    renderWindowInteractor->AddObserver("hello", cmd);
-    for (int i = 0; i < 10; i++) {
-      renderWindowInteractor->InvokeEvent("hello");
-      std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    }
-  }
-  );
+  cout << "Main thread: " << std::this_thread::get_id() << endl;
+  //std::thread th(
+  //[&]() {
+
+  //  //Hello user event. wrong sample: Hello is not run in GUI thread.
+  //  auto cmd = vtkSmartPointer<vtkCallbackCommand>::New();
+  //  //cmd->SetCallback(Hello);
+  //  My my;
+  //  cmd->SetCallback(my.Hello);
+  //  renderWindowInteractor->AddObserver("hello", cmd);
+  //  for (int i = 0; i < 10; i++) {
+  //    renderWindowInteractor->InvokeEvent("hello");
+  //    filter->InvokeEvent(filter->RefreshEvent, NULL);
+  //    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+  //  }
+  //}
+  //);
 
   //trigger user event.
   filter->InvokeEvent(filter->RefreshEvent, NULL);
   renderWindow->Render();
   renderWindowInteractor->Start();
-  th.join();
+  //th.join();
   return EXIT_SUCCESS;
 }
 
 void CallbackFunction(vtkObject *caller,
                       long unsigned int eventId,
                       void *clientData, void *callData ) {
-  std::cout << "CallbackFunction called." << std::endl;
+  std::cout << "CallbackFunction called. " << std::this_thread::get_id() << std::endl;
 }

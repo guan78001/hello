@@ -12,7 +12,7 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 #include <vtkPolyData.h>
 #include <vtkSphereSource.h>
 #include <vtkInteractorStyleTrackballCamera.h>
-
+#include <thread>
 vtkSmartPointer<vtkSphereSource> g_sphereSource;
 // Define interaction style
 class KeyPressInteractorStyle : public vtkInteractorStyleTrackballCamera {
@@ -24,7 +24,7 @@ class KeyPressInteractorStyle : public vtkInteractorStyleTrackballCamera {
     // Get the keypress
     vtkRenderWindowInteractor *rwi = this->Interactor;
     std::string key = rwi->GetKeySym();
-
+    std::cout << "OnKeyPress: " << std::this_thread::get_id() << endl;
     // Output the key that was pressed
     std::cout << "Pressed " << key << std::endl;
 
@@ -85,6 +85,7 @@ int main(int, char *[]) {
   renderWindowInteractor->SetInteractorStyle(style);
   style->SetCurrentRenderer(renderer);
 
+  std::cout << "GUI thread: " << std::this_thread::get_id() << endl;
   renderer->AddActor(actor);
   renderer->SetBackground(.1, .2, .3); // Background color white
 
