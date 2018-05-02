@@ -14,7 +14,6 @@
 #include <concurrent_vector.h>
 #include <concurrent_unordered_map.h>
 #include <ppltasks.h>
-#include <agents.h>
 using namespace concurrency;
 using namespace std;
 __declspec(noinline) bool is_prime(int n) {
@@ -208,16 +207,18 @@ void test_structured_task_group() {
 
   tasks.run(task1);
   tasks.run(task2);
-  tasks.run_and_wait(task3);
+  //tasks.run_and_wait(task3);
   tasks.run(task3);
   tasks.wait();
 }
 void test_parallel_invoke() {
   // Use the make_task function to define several tasks.
-  auto task1 = make_task([] { print_message(L"Hello"); });//task handle
+  auto task1 = create_task([] { print_message(L"Hello"); });
   auto task2 = make_task([] { print_message(42);  });
   auto task3 = make_task([] { this_thread::sleep_for(chrono::milliseconds(2000));  print_message(3.14);  });
-  parallel_invoke(task1, task2, task3);
+  //parallel_invoke(task1, task2, task3);
+  task1.wait();
+  task2();
   cout << "main threading." << endl;
 }
 void test2() {
@@ -290,62 +291,6 @@ void simple_parallel_invoke() {
   );
 
   wcout << n << L' ' << d << L' ' << s.c_str() << endl;
-}
-
-// Creates a task that completes after the specified delay.
-task<void> complete_after(unsigned int timeout) {
-  printf_s("%s(timeout=%d ms) \n", __FUNCTION__, timeout);
-  // A task completion event that is set when a timer fires.
-  task_completion_event<void> tce;
-
-  // Create a non-repeating timer.
-  auto fire_once = new timer<int>(timeout, 0, nullptr, false);
-  // Create a call object that sets the completion event after the timer fires.
-  auto callback = new call<int>([tce](int) {
-    tce.set();
-  });
-
-  // Connect the timer to the callback and start the timer.
-  fire_once->link_target(callback);
-  fire_once->start();
-
-  // Create a task that completes after the completion event is set.
-  task<void> event_set(tce);
-
-  // Create a continuation task that cleans up resources and
-  // and return that continuation task.
-  return event_set.then([callback, fire_once]() {
-    delete callback;
-    delete fire_once;
-  });
-}
-
-// Cancels the provided task after the specifed delay, if the task
-// did not complete.
-template<typename T>
-task<T> cancel_after_timeout(task<T> t, cancellation_token_source cts, unsigned int timeout) {
-  // Create a task that returns true after the specified task completes.
-  task<bool> success_task = t.then([](T) {
-    return true;
-  });
-  // Create a task that returns false after the specified timeout.
-  task<bool> failure_task = complete_after(timeout).then([] {
-    return false;
-  });
-
-  // Create a continuation task that cancels the overall task
-  // if the timeout task finishes first.
-  return (failure_task || success_task).then([t, cts](bool success) {
-    if (!success) {
-      // Set the cancellation token. The task that is passed as the
-      // t parameter should respond to the cancellation and stop
-      // as soon as it can.
-      cts.cancel();
-    }
-
-    // Return the original task.
-    return t;
-  });
 }
 
 void test_paralle_map_reduce() {
@@ -478,9 +423,8 @@ int main() {
   //test_when_all();
   //test_when_any();
   //test_task_group();
-  //test_structured_task_group();
+  test_structured_task_group();
   //test_parallel_invoke();
-  complete_after(1000).wait();
   return 0;
   //simple_parallel_for();
   //simple_parallel_for_each();
