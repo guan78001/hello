@@ -1,0 +1,1 @@
+VTK_Project(Triangle Triangle.cpp)
