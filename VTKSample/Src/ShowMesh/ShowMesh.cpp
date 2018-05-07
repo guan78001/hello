@@ -17,95 +17,183 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 #include <vtkRenderer.h>
 #include <vtkDoubleArray.h>
 #include <vtkRenderWindowInteractor.h>
-
+#include <vtkUnsignedIntArray.h>
+#include <vtkFloatArray.h>
+#include <vtkPLYReader.h>
 // For compatibility with new VTK generic data arrays
 #ifdef vtkGenericDataArray_h
 #define InsertNextTupleValue InsertNextTypedTuple
 #endif
 
-int main(int, char *[]) {
-  // Setup points
+struct Mesh {
+  std::vector<float> verts;
+  std::vector<float> normals;
+  std::vector<unsigned char> colors;
+  std::vector<int> faces;
+};
+
+vtkSmartPointer<vtkPoints> GetPoints(const float *verts, int nPoints) {
   vtkSmartPointer<vtkPoints> points =
     vtkSmartPointer<vtkPoints>::New();
-  points->InsertNextPoint(1.0, 0.0, 0.0);
-  points->InsertNextPoint(0.0, 0.0, 0.0);
-  points->InsertNextPoint(0.0, 1.0, 0.0);
-  points->InsertNextPoint(1.0, 1.0, 0.0);
-
-  // Define some colors
-  unsigned char red[3] = { 255, 0, 0 };
-  unsigned char green[3] = { 0, 255, 0 };
-  unsigned char blue[3] = { 0, 0, 255 };
-  unsigned char yellow[3] = { 255, 255, 0 };
-
-  // Setup the colors array
-  vtkSmartPointer<vtkUnsignedCharArray> colors =
+  for (int i = 0; i < nPoints; ++i, verts += 3) {
+    points->InsertNextPoint(verts[0], verts[1], verts[2]);
+  }
+  return points;
+}
+vtkSmartPointer<vtkUnsignedCharArray> GetColors(const unsigned char *colors, int nPoints) {
+  vtkSmartPointer<vtkUnsignedCharArray> colorArray =
     vtkSmartPointer<vtkUnsignedCharArray>::New();
-  colors->SetNumberOfComponents(3);
-  //colors->SetName("Colors");
+  colorArray->SetNumberOfComponents(3);
+  colorArray->SetName("Colors");
 
-  // Add the three colors we have created to the array
-  colors->InsertNextTupleValue(red);
-  colors->InsertNextTupleValue(green);
-  colors->InsertNextTupleValue(blue);
-  colors->InsertNextTupleValue(yellow);
+  for (int i = 0; i < nPoints; ++i, colors += 3) {
+    colorArray->InsertNextTupleValue(colors);
+  }
 
-  // Create a triangle
+  return colorArray;
+}
+
+vtkSmartPointer<vtkCellArray> GetTriangles(const int *ids, int nFaces) {
   vtkSmartPointer<vtkCellArray> triangles =
     vtkSmartPointer<vtkCellArray>::New();
-  vtkSmartPointer<vtkTriangle> triangle =
-    vtkSmartPointer<vtkTriangle>::New();
-  triangle->GetPointIds()->SetId(0, 0);
-  triangle->GetPointIds()->SetId(1, 2);
-  triangle->GetPointIds()->SetId(2, 1);
-  triangles->InsertNextCell(triangle);
 
-  {
+  for (int i = 0; i < nFaces; ++i, ids += 3) {
     vtkSmartPointer<vtkTriangle> triangle =
       vtkSmartPointer<vtkTriangle>::New();
-    triangle->GetPointIds()->SetId(0, 2);
-    triangle->GetPointIds()->SetId(1, 0);
-    triangle->GetPointIds()->SetId(2, 3);
+    triangle->GetPointIds()->SetId(0, ids[0]);
+    triangle->GetPointIds()->SetId(1, ids[1]);
+    triangle->GetPointIds()->SetId(2, ids[2]);
+
     triangles->InsertNextCell(triangle);
   }
 
-  // Create a polydata object and add everything to it
-  vtkSmartPointer<vtkPolyData> polydata =
-    vtkSmartPointer<vtkPolyData>::New();
-  polydata->SetPoints(points);
-  polydata->SetPolys(triangles);
-  polydata->GetPointData()->SetScalars(colors);
+  return triangles;
+}
 
-  // Set point normals
+vtkSmartPointer<vtkDoubleArray> GetNormals(const float *normals, int nPoints) {
   vtkSmartPointer<vtkDoubleArray> pointNormalsArray =
     vtkSmartPointer<vtkDoubleArray>::New();
   pointNormalsArray->SetNumberOfComponents(3); //3d normals (ie x,y,z)
-  pointNormalsArray->SetNumberOfTuples(polydata->GetNumberOfPoints());
+  pointNormalsArray->SetNumberOfTuples(nPoints);
 
-  // Construct the normal vectors
-  double pN1[3] = { 1.0, 0.0, 0.0 };
-  double pN2[3] = { 0.0, 1.0, 0.0 };
-  double pN3[3] = { 0.0, 0.0, 1.0 };
-  double pN4[3] = { 1.0, 0.0, 0.0 };
+  for (int i = 0; i < nPoints; ++i, normals += 3) {
+    pointNormalsArray->SetTuple(i, normals);
+  }
 
-  // Add the data to the normals array
-  pointNormalsArray->SetTuple(0, pN1);
-  pointNormalsArray->SetTuple(1, pN2);
-  pointNormalsArray->SetTuple(2, pN3);
-  pointNormalsArray->SetTuple(3, pN4);
+  return pointNormalsArray;
+}
 
-  // Add the normals to the points in the polydata
-  polydata->GetPointData()->SetNormals(pointNormalsArray);
+vtkSmartPointer<vtkPolyData> GetPolyData(const Mesh &mesh) {
+  vtkSmartPointer<vtkPolyData> polydata =
+    vtkSmartPointer<vtkPolyData>::New();
+  int nPoints = (int)mesh.verts.size() / 3;
+  int nFaces = (int)mesh.faces.size() / 3;
+  polydata->SetPoints(GetPoints(&mesh.verts[0], nPoints));
+  polydata->SetPolys(GetTriangles(&mesh.faces[0], nFaces));
+  if (mesh.colors.size() > 0) {
+    polydata->GetPointData()->SetScalars(GetColors(&mesh.colors[0], nPoints));
+  }
+  if (mesh.normals.size() > 0) {
+    polydata->GetPointData()->SetNormals(GetNormals(&mesh.normals[0], nPoints));
+  }
 
+  return polydata;
+}
 
+Mesh GetSimpleMesh() {
+  Mesh mesh;
+  mesh.verts = { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0 };
+  mesh.colors = { 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 0};
+  mesh.normals = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1};
+  mesh.faces = {0, 2, 1, 2, 0, 3};
+  return mesh;
+}
+
+Mesh GetMesh(const vtkSmartPointer<vtkPolyData> &polyData) {
+  Mesh mesh;
+  vtkPoints *pointsArray = polyData->GetPoints();
+  int n = pointsArray->GetNumberOfPoints();
+  mesh.verts.resize(n * 3);
+  for (int i = 0; i < n; ++i) {
+    double x[3];
+    polyData->GetPoint(i, x);
+    mesh.verts[3 * i] = x[0];
+    mesh.verts[3 * i + 1] = x[1];
+    mesh.verts[3 * i + 2] = x[2];
+  }
+
+  //face
+  vtkCellArray *pFaces = polyData->GetPolys();
+  vtkIdType nFace = pFaces->GetNumberOfCells();
+  mesh.faces.resize(3 * nFace);
+#if 0
+  pFaces->InitTraversal();
+  vtkSmartPointer<vtkIdList> idList = vtkSmartPointer<vtkIdList>::New();
+  for (vtkIdType i = 0; i < nFace; ++i) {
+    pFaces->GetNextCell(idList);
+    mesh.faces[3 * i] = idList->GetId(0);
+    mesh.faces[3 * i + 1] = idList->GetId(1);
+    mesh.faces[3 * i + 2] = idList->GetId(2);
+  }
+#else
+  vtkIdType cellLocation = 0; // the index into the cell array
+  for (vtkIdType i = 0; i < nFace; ++i) {
+    vtkIdType numIds;
+    vtkIdType *pointIds;
+
+    pFaces->GetCell(cellLocation, numIds, pointIds);
+    cellLocation += 1 + numIds;
+
+    mesh.faces[3 * i] = pointIds[0];
+    mesh.faces[3 * i + 1] = pointIds[1];
+    mesh.faces[3 * i + 2] = pointIds[2];
+  }
+#endif
+
+  //color
+  vtkDataArray *colors = polyData->GetPointData()->GetScalars();
+  if (colors) {
+    vtkIdType nColors = colors->GetNumberOfTuples();
+    mesh.colors.resize(nColors * 3);
+    for (vtkIdType i = 0; i < nColors; ++i) {
+      for (int j = 0; j < 3; j++) {
+        mesh.colors[3 * i + j] = colors->GetComponent(i, j);
+      }
+    }
+  }
+
+  //normal
+  vtkDataArray *normals = polyData->GetPointData()->GetNormals();
+  if (normals) {
+    vtkIdType nNormals = normals->GetNumberOfTuples();
+    mesh.normals.resize(nNormals);
+    for (vtkIdType i = 0; i < nNormals; i++) {
+      for (int j = 0; j < 3; j++) {
+        mesh.normals[3 * i + j] = normals->GetComponent(i, j);
+      }
+    }
+  }
+  return mesh;
+}
+int main(int argc, char *argv[]) {
+  vtkSmartPointer<vtkPolyData>  polydata = GetPolyData(GetSimpleMesh());
+
+  if (argc > 1) {
+    cout << argv[1] << endl;
+    vtkSmartPointer<vtkPLYReader> reader =
+      vtkSmartPointer<vtkPLYReader>::New();
+    reader->SetFileName(argv[1]);
+    reader->Update();
+    polydata = vtkSmartPointer<vtkPolyData>(reader->GetOutput());
+
+    Mesh mesh = GetMesh(polydata);
+    polydata = GetPolyData(mesh);
+  }
   // Visualize
   vtkSmartPointer<vtkPolyDataMapper> mapper =
     vtkSmartPointer<vtkPolyDataMapper>::New();
-#if VTK_MAJOR_VERSION <= 5
-  mapper->SetInputConnection(polydata->GetProducerPort());
-#else
+
   mapper->SetInputData(polydata);
-#endif
 
   vtkSmartPointer<vtkActor> actor =
     vtkSmartPointer<vtkActor>::New();
