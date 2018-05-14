@@ -15,6 +15,7 @@ VTK_MODULE_INIT(vtkRenderingFreeType);
 #include <vtkTransform.h>
 #include <vtkAxesActor.h>
 #include <vtkOrientationMarkerWidget.h>
+#include <vtkCamera.h>
 #include <sstream>
 vtkSmartPointer<vtkActorCollection> GetActors(const std::vector<std::string> &filenames) {
 
@@ -99,37 +100,38 @@ int main(int argc, char *argv[]) {
   renderWindowInteractor->SetRenderWindow(renderWindow);
 
   std::vector<std::string> files = GetFileNames(argv[1], 3);
-  vtkSmartPointer<vtkTransform> transform =
-    vtkSmartPointer<vtkTransform>::New();
   //transform->PostMultiply(); //this is the key line
 
-#if 1
   vtkSmartPointer<vtkActorCollection> actors = GetActors(files);
+
+  double origin_normal[3] = { 0, 0, 1 };
+  double position[3][4];
+  double center_point[3][4];
+
   actors->InitTraversal();
-  double x = 1.0f;
-  transform->Identity();
   for (vtkIdType i = 0; i < actors->GetNumberOfItems(); i++) {
+    vtkSmartPointer<vtkTransform> dir = vtkSmartPointer<vtkTransform>::New();
+    dir->Translate(origin_normal);
+
+    vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
     vtkActor *actor = actors->GetNextActor();
-    //renderer->AddActor(actor);
-    //transform->Identity();
-    if (i > 0) {
-      transform->Translate(0, i * i * 10, 0);
-      //transform->RotateX(i * 40);
-      actor->SetUserTransform(transform);
+    //transform->RotateY(i * 10);
+    transform->Translate(i * 5, 0, 0);
+    actor->SetUserTransform(transform);
+
+    double *bounds = actor->GetBounds();
+    printf("actor_%d, [%f,%f ; %f,%f ;%f,%f]\n", i, bounds[0], bounds[1], bounds[2], bounds[3], bounds[4], bounds[5]);
+    double *center = center_point[i];
+    for (int t = 0; t < 3; ++t) {
+      center[t] = (bounds[2 * t] + bounds[2 * t + 1]) * 0.5;
     }
+    printf("center: [%f,%f,%f]\n", center[0], center[1], center[2]);
+
+    dir->TransformPoint(center_point[i], position[i]);
+    printf("position: [%f,%f,%f]\n", position[i][0], position[i][1], position[i][2]);
 
     renderer->AddActor(actor);
   }
-#else
-  auto acotrs = GetActors2(files);
-  double x = 1.0f;
-  for (auto &actor : acotrs) {
-    x += 20.0f;
-    transform->Translate(x, 0, 0);
-    actor->SetUserTransform(transform);
-    renderer->AddActor(actor);
-  }
-#endif
 
   vtkSmartPointer<vtkInteractorStyleTerrain> style =
     vtkSmartPointer<vtkInteractorStyleTerrain>::New();
@@ -144,11 +146,20 @@ int main(int argc, char *argv[]) {
   widget->SetOutlineColor(0.9300, 0.5700, 0.1300);
   widget->SetOrientationMarker(axes);
   widget->SetInteractor(renderWindowInteractor);
-  widget->SetViewport(0.0, 0.0, 0.4, 0.4);
+  widget->SetViewport(0.0, 0.0, 0.3, 0.3);
   widget->SetEnabled(1);
   widget->InteractiveOn();//moveable
   widget->InteractiveOff();
 
+  vtkSmartPointer<vtkCamera> camera = vtkSmartPointer<vtkCamera>::New();
+  int t = 0;
+  //camera->SetPosition(45, 15, 10);
+  //camera->SetFocalPoint(focal_point[t]);
+
+  camera->SetPosition(position[t]);
+  camera->SetFocalPoint(center_point[t]);
+
+  renderer->SetActiveCamera(camera);
   renderer->ResetCamera();
 
   renderer->SetBackground(0.1804, 0.5451, 0.3412); // Sea green

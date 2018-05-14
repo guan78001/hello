@@ -1,5 +1,8 @@
 add_subdirectory(CallData)
+add_subdirectory(Camera)
+add_subdirectory(CloseWindow)
 add_subdirectory(Cylinder)
+add_subdirectory(DataAnimation)
 add_subdirectory(DynamicRender)
 add_subdirectory(DisplayCoordinateAxes)
 add_subdirectory(ExtractSurfaceDemo)

@@ -57,6 +57,18 @@ vtkSmartPointer<vtkCellArray> GetTriangles(const int *ids, int nFaces) {
   vtkSmartPointer<vtkCellArray> triangles =
     vtkSmartPointer<vtkCellArray>::New();
 
+#if 0
+  triangles->SetNumberOfCells(nFaces);
+  triangles->Allocate(nFaces * 4);
+  vtkIdList *pts = nullptr;
+  while (triangles->GetNextCell(pts)) {
+    pts->SetId(0, ids[0]);
+    pts->SetId(1, ids[1]);
+    pts->SetId(2, ids[2]);
+    ids += 3;
+  }
+#else
+  //triangles->Allocate(nFaces * 3);
   for (int i = 0; i < nFaces; ++i, ids += 3) {
     vtkSmartPointer<vtkTriangle> triangle =
       vtkSmartPointer<vtkTriangle>::New();
@@ -66,7 +78,7 @@ vtkSmartPointer<vtkCellArray> GetTriangles(const int *ids, int nFaces) {
 
     triangles->InsertNextCell(triangle);
   }
-
+#endif
   return triangles;
 }
 
