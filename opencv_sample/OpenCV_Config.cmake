@@ -27,3 +27,14 @@ set(OPENCV_LIB		        debug opencv_calib3d${OPENCV_VERSION}d.lib optimized ope
 message("OpenCV_DIR: ${OPENCV_DIR}")
 include_directories(${OPENCV_INC_DIR})
 link_directories(${OPENCV_LIB_DIR})
+
+macro (CopyOpenCV target)
+set(BUILD_TYPE $<$<CONFIG:debug>:debug>$<$<CONFIG:release>:release>)
+set(OPENCV_BUILD_TYPE $<$<CONFIG:debug>:d>$<$<CONFIG:release>:>)
+SET(OPENCV_MODULES "calib3d" "contrib" "core" "features2d" "flann" "gpu" "highgui" "imgproc" "legacy" "ml" "nonfree" "objdetect" "ocl" "photo" "stitching" "superres" "video" "videostab")
+FOREACH(MODULE ${OPENCV_MODULES})
+	add_custom_command(TARGET ${target} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OPENCV_BIN_DIR}/opencv_${MODULE}${OPENCV_VERSION}${OPENCV_BUILD_TYPE}.dll" ${PROJECT_BINARY_DIR}/$<CONFIGURATION>
+	)
+ENDFOREACH(MODULE)
+endmacro()

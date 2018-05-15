@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <opencv2/opencv.hpp>
-#include "vld.h"
+//#include "vld.h"
 using namespace cv;
 int main(int argc, char **argv) {
   //int *p = new int[4];
