@@ -168,6 +168,7 @@ void test_time(char *function_name, std::function<void()> f) {
   printf("%s used time: %f ms\n", function_name, (t1 - t0) * 1000);
 }
 int main(int argc, char *argv[]) {
+  cout << "sizeof(void*)=" << sizeof(void *) << endl;
 #define NAME(func) #func
 #define TEST(func) test_time(NAME(func),func);
   TEST(seq_vector);
