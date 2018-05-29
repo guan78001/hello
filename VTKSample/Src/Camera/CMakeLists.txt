@@ -1,0 +1,1 @@
+VTK_Project(Camera Camera.cpp)

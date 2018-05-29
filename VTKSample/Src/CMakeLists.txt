@@ -1,3 +1,4 @@
+add_subdirectory(Cube)
 add_subdirectory(CallData)
 add_subdirectory(Camera)
 add_subdirectory(CloseWindow)
