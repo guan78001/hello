@@ -1,0 +1,1 @@
+..\..\build-x64\Debug\ReadOBJ.exe cube.obj
