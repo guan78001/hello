@@ -1,0 +1,3 @@
+ComputerName, Time, Catalog, AvgDistance(micron), AvgCaptureTime(ms), AllCaptureTime(ms), CaptureCounts, SuccessCaptureCounts, SuccessCaptureRate, 
+DESKTOP-OVF2R7O, 2018-08-02.16:32:30, 1, 21.2, 41.6, 397, 9, 9, 1.0000
+DESKTOP-OVF2R7O, 2018-08-02.17:16:44, 1, 22.2, 41.1, 394, 9, 9, 1.0000
