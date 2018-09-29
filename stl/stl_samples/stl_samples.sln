@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CarvePlaneMesh", "CarvePlan
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SmallTricks", "SmallTricks\SmallTricks.vcxproj", "{0DE33E96-8455-4C73-A458-AB8652398148}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LineEquationSolve", "LineEquationSolve\LineEquationSolve.vcxproj", "{DB36C21F-DEE7-47D5-8106-A40AC6A811F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -51,6 +53,10 @@ Global
 		{0DE33E96-8455-4C73-A458-AB8652398148}.Debug|Win32.Build.0 = Debug|Win32
 		{0DE33E96-8455-4C73-A458-AB8652398148}.Release|Win32.ActiveCfg = Release|Win32
 		{0DE33E96-8455-4C73-A458-AB8652398148}.Release|Win32.Build.0 = Release|Win32
+		{DB36C21F-DEE7-47D5-8106-A40AC6A811F1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DB36C21F-DEE7-47D5-8106-A40AC6A811F1}.Debug|Win32.Build.0 = Debug|Win32
+		{DB36C21F-DEE7-47D5-8106-A40AC6A811F1}.Release|Win32.ActiveCfg = Release|Win32
+		{DB36C21F-DEE7-47D5-8106-A40AC6A811F1}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
