@@ -1,0 +1,1 @@
+VTK_Project(UserEvent UserEvent.cpp vtkTestFilter)
