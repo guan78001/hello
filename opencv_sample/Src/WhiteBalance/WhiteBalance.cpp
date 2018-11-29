@@ -28,7 +28,7 @@ void GrayWorld_WhiteBalance(char * imageFileName) {
 
   //RGB三通道图像合并
   merge(imageRGB, imageSource);
-  imshow("白平衡调整后", imageSource);
+  imshow("GrayWorld_WhiteBalance", imageSource);
 }
 
 void color_balance(IplImage *img) {
@@ -87,24 +87,80 @@ void color_balance(IplImage *img) {
   }
 }
 
+void color_balance(Mat &mat) {
+  int histo[256] = { 0 };//直方图统计每个像素值的数目
+  int num_of_pixels = mat.size().area();
+  //统计每个像素值的数目
+  for (int y = 0; y <mat.rows; ++y) {
+    uchar *data = mat.ptr<uchar>(y);
+    for (int x = 0; x < mat.cols; ++x) {
+      histo[data[x]] += 1;
+    }
+  }
+
+  //统计当前像素值和之前像素值的总数
+  for (int i = 1; i < 256; ++i)
+    histo[i] = histo[i] + histo[i - 1];
+
+  double s = 0.0265;//此参数可以调整，最好在0.1以下(0=<s<=1)
+
+  int vmin = 0;
+
+  //统计像素点数目小于num_of_pixels*s / 2的数目，s为控制比率
+  while (histo[vmin + 1] <= cvRound(num_of_pixels*s / 2))
+    vmin = vmin + 1;
+
+  int vmax = 255 - 1;
+
+  //统计像素点数目大于num_of_pixels*(1 - s / 2)的数目，s为控制比率
+  while (histo[vmax - 1] > cvRound(num_of_pixels*(1 - s / 2))) {
+    vmax = vmax - 1;
+  }
+
+  if (vmax < 255 - 1)
+    vmax = vmax + 1;
+
+  //处理图像中像素值大于vmin和小于vmax的像素，
+  //即处理偏亮和偏暗的区域
+  for (int y = 0; y < mat.rows; ++y) {
+    uchar *data = mat.ptr<uchar>(y);
+    for (int x = 0; x < mat.cols; ++x) {
+      if (data[x] < vmin)
+        data[x] = vmin;
+      if (data[x] > vmax)
+        data[x] = vmax;
+    }
+  }
+
+  //对其他的像素进行处理（拉伸），其实可以合并到上一步，简化时间复杂度，这里分开只是为了让过程更清楚
+  for (int y = 0; y < mat.rows; ++y) {
+    uchar *data = mat.ptr<uchar>(y);
+    for (int x = 0; x < mat.cols; ++x) {
+      data[x] = cvRound((data[x] - vmin)*255.0 / (vmax - vmin));
+    }
+  }
+}
 void HisgramScale(char * imageFileName) {
-  IplImage *srcImg = cvLoadImage(imageFileName);//读取图片
-  IplImage *dstImg = cvCreateImage(cvGetSize(srcImg), 8, 3);
-  IplImage *redCh = cvCreateImage(cvGetSize(srcImg), 8, 1);//R通道
-  IplImage *greenCh = cvCreateImage(cvGetSize(srcImg), 8, 1);//G通道
-  IplImage *blueCh = cvCreateImage(cvGetSize(srcImg), 8, 1);//B通道
-  cvSplit(srcImg, blueCh, greenCh, redCh, NULL);//把原图拆分RGB通道
-  color_balance(redCh);//对R通道进行色彩平衡
-  color_balance(greenCh);//对G通道进行色彩平衡
-  color_balance(blueCh);//对B通道进行色彩平衡
-  cvMerge(blueCh, greenCh, redCh, NULL, dstImg);//合并操作后的通道，为最终结果
+  Mat imageSource = imread(imageFileName);
+  vector<Mat> imageRGB;
 
-  //显示操作
-  cvNamedWindow("src", CV_WINDOW_AUTOSIZE);
-  cvShowImage("src", srcImg);
-
-  cvNamedWindow("dst_hist", CV_WINDOW_AUTOSIZE);
-  cvShowImage("dst_hist", dstImg);
+  //RGB三通道分离
+  split(imageSource, imageRGB);
+#if 1
+  color_balance(imageRGB[0]);
+  color_balance(imageRGB[1]);
+  color_balance(imageRGB[2]);
+#else
+  IplImage imgR = imageRGB[0];
+  IplImage imgG = imageRGB[1];
+  IplImage imgB = imageRGB[2];
+  color_balance(&imgR);//对R通道进行色彩平衡
+  color_balance(&imgG);//对G通道进行色彩平衡
+  color_balance(&imgB);//对B通道进行色彩平衡
+#endif
+  //RGB三通道图像合并
+  merge(imageRGB, imageSource);
+  imshow("HisgramScale", imageSource);
 }
 
 
