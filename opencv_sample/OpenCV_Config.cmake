@@ -1,4 +1,4 @@
-set(OPENCV_DIR "D:/github/hello/opencv_sample/opencv")
+set(OPENCV_DIR ${CMAKE_CURRENT_SOURCE_DIR}/opencv)
 set(OPENCV_INC_DIR ${OPENCV_DIR}/include) 
 set(OPENCV_LIB_DIR ${OPENCV_DIR}/x64/vc12/lib)
 set(OPENCV_BIN_DIR ${OPENCV_DIR}/x64/vc12/bin)

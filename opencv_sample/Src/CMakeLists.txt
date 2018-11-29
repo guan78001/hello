@@ -1,1 +1,2 @@
 add_subdirectory(DisplayImage)
+add_subdirectory(WhiteBalance)
