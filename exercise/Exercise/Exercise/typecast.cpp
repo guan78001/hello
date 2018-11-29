@@ -20,8 +20,8 @@ int main() {
 
   {
     B *pb = new B;
-    D *pd1 = static_cast<D*>(pb);
-    D *pd2 = dynamic_cast<D*>(pb);//向下类型转换，dynamic_cast要求参数pb是多态类型（有虚函数）
+    D *pd1 = static_cast<D*>(pb);//转换错误时不返回nullptr，不安全
+    D *pd2 = dynamic_cast<D*>(pb);//向下类型转换，dynamic_cast要求参数pb是多态类型（有虚函数）。错误转换返回nullptr
 
     cout << "pd=" << pb << endl;
     cout << "pd1=" << pd1 << endl;
@@ -32,6 +32,7 @@ int main() {
 
   {
     D *pd = new D;
+    //向上类型转换static_cast，dynamic_cast都一样。
     B *pd1 = static_cast<B*>(pd);
     B *pd2 = dynamic_cast<B*>(pd);
 
@@ -39,6 +40,11 @@ int main() {
     cout << "pd1=" << pd1 << endl;
     cout << "pd2=" << pd2 << endl;
     delete pd;
+  }
+
+  {
+    int *n = new int;
+    double *d = reinterpret_cast<double*> (n);
   }
   return 0;
 }
