@@ -334,7 +334,7 @@ Normalizer GetNormalizer_hsv(Mat &mat, float inLow, float inHigh, float outLow, 
   }
   float highVal = highBin / float(histSize); // in [0..1]
 
-  Normalizer normalizer(lowVal, highVal, outLow, outHigh);
+  Normalizer normalizer(lowVal, highVal, 40.0f / 255.0f, 200.0f / 255.0f);
   return normalizer;
 }
 void color_balance2(Mat &mat, float low = 40.0f / 255.0f, float high = 200.0f / 255.0f) {
@@ -445,9 +445,9 @@ void HisgramScale_RGB(Mat &mat) {
   //imshow("Origin", imageSource);
   vector<Mat> imageRGB;
   split(mat, imageRGB);
-  color_balance2(imageRGB[0], 40.0f / 255.0f, 200.0f / 255.0f);
-  color_balance2(imageRGB[1], 40.0f / 255.0f, 200.0f / 255.0f);
-  color_balance2(imageRGB[2], 40.0f / 255.0f, 200.0f / 255.0f);
+  color_balance2(imageRGB[0], 40.0f / 255.0f, 170.0f / 255.0f);
+  color_balance2(imageRGB[1], 20.0f / 255.0f, 150.0f / 255.0f);
+  color_balance2(imageRGB[2], 20.0f / 255.0f, 140.0f / 255.0f);
   merge(imageRGB, mat);
 }
 void HisgramScale_RGB(char *imageFileName) {
@@ -465,17 +465,59 @@ void HisgramScale_Hsv(Mat &mat) {
   color_balance_hsv(mat);
 }
 
+void GammaCorrection(float amplitude, float gamma, unsigned char &r, unsigned char &g, unsigned char &b) {
+  Rgb rgb;
+  rgb.r = r;
+  rgb.g = g;
+  rgb.b = b;
+
+  // Compute the gamma correction
+  Hsv hsv;
+  Convert(rgb, hsv);
+  // Add extra gamma correction to brighten the overall
+  hsv.v = pow(hsv.v, gamma); // apply correction, brightens if less than 1
+  hsv.v *= amplitude;
+
+  // Adjust saturation (function provided by Zech)
+  float L = 0.2f, center = 0.4f;
+  float fac = L * 0.16f;
+  float pi = 3.1415926f;
+  float outputS = hsv.s <= 0 ? 0.0f : exp(log(hsv.s) / 0.7f);
+  if (hsv.s <= center) {
+    outputS += fac * sin(hsv.s / center * pi);
+  } else {
+    outputS += fac * sin((hsv.s - center) / (1.0f - center) * pi);
+  }
+  hsv.s = std::max(0.0f, std::min(outputS, 1.0f));
+  Convert(hsv, rgb);
+
+  r = rgb.r;
+  g = rgb.g;
+  b = rgb.b;
+}
+
+void GammaCorrection(cv::Mat &image, float gamma) {
+  int col = image.cols;
+  int row = image.rows;
+  int channel = image.channels();
+  unsigned char *imageData = image.data;
+  #pragma omp parallel for
+  for (int i = 0; i < col * row; i++) {
+    unsigned char *color = imageData + i * channel;
+    GammaCorrection(1.0, gamma, color[2], color[1], color[0]); // A = 1.0 by default
+  }
+}
 
 
 int main() {
-  //char *path = "D:\\DataSet\\shade_image\\StoneModel_new\\\jpeg";
+  //char *path = "D:\\DataSet\\shade_image\\StoneModel\\\jpeg";
   //int id1 = 4481, id2 = 13;
 
-  char *path = "D:\\DataSet\\shade_image\\Invivo\\Models";
-  int id1 = 3862, id2 = 35;
+  //char *path = "D:\\DataSet\\shade_image\\Invivo3\\Models1";
+  //int id1 = 3862, id2 = 35;
 
-  //char *path = "D:\\DataSet\\shade_image\\PlasticModel\\jpeg";
-  //int id1 = 251, id2 = 22;
+  char *path = "D:\\DataSet\\shade_image\\PlasticModel2\\Models";
+  int id1 = 251, id2 = 22;
 
   //convert image
   char imageFileName[256];
@@ -501,6 +543,8 @@ int main() {
       sprintf(imageFileName, "%s\\image_%d.jpg", path, i++);
       Mat mat = imread(imageFileName);
       imshow("Origin", mat);
+      GammaCorrection(mat, 0.6);//ACQ: 0.2, 0.4, 0.6
+      imshow("GammaCorrection", mat);
       GrayWorld_WhiteBalance(imageFileName);
       HisgramScale_RGB(imageFileName);
       HisgramScale_Hsv(imageFileName);
