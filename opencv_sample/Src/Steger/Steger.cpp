@@ -37,7 +37,7 @@ void StegerLine(const char *filename) {
   vector<double> Pt;
   for (int i = 0; i < imgcol; i++) {
     for (int j = 0; j < imgrow; j++) {
-      if (img0.at<uchar>(j, i) > 50) {
+      if (img0.at<uchar>(j, i) > 10) {
         Mat hessian(2, 2, CV_32FC1);
         hessian.at<float>(0, 0) = dxx.at<float>(j, i);
         hessian.at<float>(0, 1) = dxy.at<float>(j, i);
@@ -62,7 +62,7 @@ void StegerLine(const char *filename) {
 
         double t = -(nx * dx.at<float>(j, i) + ny * dy.at<float>(j, i)) / (nx * nx * dxx.at<float>(j, i) + 2 * nx * ny * dxy.at<float>(j, i) + ny * ny * dyy.at<float>(j, i));
 
-        if (fabs(t * nx) <= 0.5 && fabs(t * ny) <= 0.5) {
+        if (fabs(t * nx) <= 1 && fabs(t * ny) <= 1) {
           Pt.push_back(i);
           Pt.push_back(j);
         }
@@ -76,7 +76,12 @@ void StegerLine(const char *filename) {
     rpt.y = Pt[2 * k + 1];
     circle(img0, rpt, 1, Scalar(0, 0, 255));
   }
-
+  for (int i = 0; i < 640; i++) {
+    Point rpt;
+    rpt.x = i;
+    rpt.y = 160;
+    circle(img0, rpt, 1, Scalar(0, 0, 255));
+  }
   imshow("result", img0);
   waitKey(0);
 }
