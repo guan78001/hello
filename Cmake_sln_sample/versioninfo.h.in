@@ -1,0 +1,13 @@
+#pragma once
+
+/************************************************************************/
+/* Set the version numbers and module information manually here:                                        */
+/************************************************************************/
+
+#define MODULE_MAJOR_VERSION			@MODULE_MAJOR_VERSION@
+#define MODULE_MINOR_VERSION			@MODULE_MINOR_VERSION@
+#define MODULE_REVISION_VERSION	    	@MODULE_REVISION_VERSION@
+#define MODULE_BUILD_NUMBER             @MODULE_BUILD_NUMBER@
+
+
+
