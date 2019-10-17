@@ -83,6 +83,7 @@ int LedLightCorrection::GetMaxRect(unsigned char *data, int height, int width, i
 
   rect.x = bestx - r + 1;
   rect.y = besty - r + 1;
+  rect.avg = best / (rect.rectSize * rect.rectSize);
   //cout << "bestx=" << rect.x << ", besty=" << rect.y << ", best=" << best << endl;
   return 1;
 }
