@@ -1,6 +1,6 @@
 #include "LedLightCorrection.h"
 #include <string>
-
+#include <omp.h>
 #include <opencv2/opencv.hpp>
 using namespace cv;
 
@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
   printf("uniformityThreshold=%f\n", uniformityThreshold);
   char *name[3] = { "R", "G", "B" };
   cv::Scalar clr[3] = { cv::Scalar(0, 0, 255), cv::Scalar(0, 255, 0), cv::Scalar(255, 0, 0)};//BRG order
+  double t0 = omp_get_wtime();
   for (int i = 0; i < 3; i++) {
     mat[i] = imread(filename[i]);
     max_rects[i].rectSize = nRectMaxSize;
@@ -58,7 +59,9 @@ int main(int argc, char *argv[]) {
     led.GetMaxRect(mat[i], max_rects[i]);
     led.GetLightInfo(mat[i], lightinfos[i]);
   }
+
   MergeImage(mat, mat[3]);
+
   int thickness = 2;
   for (int i = 0; i < 3; i++) {
     cv::rectangle(mat[i], cv::Point(max_rects[i].x, max_rects[i].y), cv::Point(max_rects[i].x + max_rects[i].rectSize, max_rects[i].y + max_rects[i].rectSize), clr[i], thickness);
@@ -119,10 +122,12 @@ int main(int argc, char *argv[]) {
     sprintf(title, "%s Failed Channel:%s", result, failed_str);
   }
   printf("%s\n", title);
-
+  double t1 = omp_get_wtime();
+  printf("used time: %f s\n", t1 - t0);
   namedWindow(title, 0);
   cv::resizeWindow(title, width * 1.6, height * 1.6);
   imshow(title, bigImage);
+
   waitKey();
   return 0;
 }
