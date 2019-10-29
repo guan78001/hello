@@ -1,4 +1,4 @@
-set(VTK_DIR "D:/git_clone/D3DVideo_2/3rdParty/vtk-6.2")
+set(VTK_DIR "c:/csd/git_clone/D3DVideo_2/3rdParty/vtk-6.2")
 set(PLATFORM "Win64")
 set(VTK_VERSION           6.2)
 set(VTK_LIB   vtkChartsCore-${VTK_VERSION}
