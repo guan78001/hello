@@ -30,7 +30,20 @@ void test_sqrt() {
     f += sqrt(((float)i + 0.5));
   }
 }
+
+#include <xmmintrin.h>
+float new_rsqrt(float f) { //这是调用用CPU SSE指令集中rsqrt函数直接得出结果
+
+  __m128 m_a = _mm_set_ps1(f);
+  __m128 m_b = _mm_rsqrt_ps(m_a);
+
+  return m_b.m128_f32[0];
+}
+#include <iostream>
+using namespace std;
+
 int main() {
+  cout << new_rsqrt(10000) << endl;
   TEST(test_div);
   TEST(test_mul);
   TEST(test_sqrt);
