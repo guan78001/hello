@@ -2,7 +2,6 @@
 #include <vtkAutoInit.h>
 VTK_MODULE_INIT(vtkRenderingOpenGL);
 VTK_MODULE_INIT(vtkInteractionStyle);
-
 //or
 //#define vtkRenderingCore_AUTOINIT 4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL)
 //#define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL)

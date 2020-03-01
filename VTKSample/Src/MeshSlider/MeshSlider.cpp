@@ -219,19 +219,19 @@ vtkSmartPointer<vtkSliderWidget> NewSliderWidget(vtkSmartPointer<vtkRenderWindow
 }
 int main(int argc, char *argv[]) {
 
-  for (int i = 0; i < 10; i++) {
-    auto Func = [](int x) {
-      printf("%s\n", __FUNCTION__);
-    };
-    Func(i);
-  }
-  for (int i = 0; i < 10; i++) {
-    auto Func = [](int x) {
-      printf("%s\n", __FUNCTION__);
-    };
-    Func(i);
-  }
-  return 0;
+  //for (int i = 0; i < 10; i++) {
+  //  auto Func = [](int x) {
+  //    printf("%s\n", __FUNCTION__);
+  //  };
+  //  Func(i);
+  //}
+  //for (int i = 0; i < 10; i++) {
+  //  auto Func = [](int x) {
+  //    printf("%s\n", __FUNCTION__);
+  //  };
+  //  Func(i);
+  //}
+  //return 0;
   if (argc != 2) {
     std::cout << "Usage: " << argv[0] << "  Filename(.ply)" << std::endl;
     return EXIT_FAILURE;

@@ -1,7 +1,7 @@
-#include <vtkAutoInit.h>
-VTK_MODULE_INIT(vtkRenderingOpenGL);
-VTK_MODULE_INIT(vtkInteractionStyle);
-
+//#include <vtkAutoInit.h>
+//VTK_MODULE_INIT(vtkRenderingOpenGL);
+//VTK_MODULE_INIT(vtkInteractionStyle);
+#include <vtkautoinit/vtkRenderingCore_AUTOINIT_vtkInteractionStyle_vtkRenderingFreeType_vtkRenderingOpenGL2.h>
 #include <vtkPolyData.h>
 #include <vtkPLYReader.h>
 #include <vtkSmartPointer.h>

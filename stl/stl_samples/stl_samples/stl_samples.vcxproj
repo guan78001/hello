@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stl_equal.cpp" />
+    <ClCompile Include="int operator vs operator int.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{0BDD4F8A-C98E-4360-87DD-8CFAC600516B}</ProjectGuid>
