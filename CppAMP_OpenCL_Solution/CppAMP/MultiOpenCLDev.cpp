@@ -17,7 +17,7 @@ void MultiOpenCLDev::BuildContext() {
   oclGetDevices();
   oclCreateContexts();
   oclCreateCommandQueue();
-  print_device_list();
+  //print_device_list();
 
   is_valid = true;
 }
@@ -122,7 +122,7 @@ void MultiOpenCLDev::oclGetDevicesByType(cl_platform_id cpPlatform, cl_device_ty
 
         cl_uint major = 0;
         clGetDeviceInfo(device_id, CL_NV_DEVICE_COMPUTE_CAPABILITY_MAJOR, sizeof(major), &major, NULL);
-        printf("major=%d\n", major);
+        //printf("COMPUTE_CAPABILITY_MAJOR=%d\n", major);
 
         devices_.push_back(dev);
       }
@@ -222,7 +222,7 @@ void MultiOpenCLDev::print_device_list() {
     PTRACE_INFORMATION("dev_type=%" PRIu64 "", info.device_type);//64bit
     PTRACE_INFORMATION("max_compute_unit=%d", info.max_compute_unit);
     PTRACE_INFORMATION("max_work_group_size=%d", info.max_work_group_size);
-    //PTRACE_INFORMATION("\n");
+    PTRACE_INFORMATION("\n");
   }
 }
 
