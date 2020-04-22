@@ -260,7 +260,8 @@ int OpenCLMethodCpp(const std::vector<float> &va, const std::vector<float> &vb) 
     cl::Program::Sources source(1,
                                 std::make_pair(helloStr, strlen(helloStr)));
     cl::Program program_ = cl::Program(context, source);
-    program_.build(devices);
+
+    err = program_.build(devices);
 
     //cl::Kernel kernel(program_, "hello", &err);
     cl::Kernel kernel_add(program_, "add", &err);
@@ -289,34 +290,36 @@ int OpenCLMethodCpp(const std::vector<float> &va, const std::vector<float> &vb) 
     cl::Buffer buffer_b(context, CL_MEM_READ_ONLY, data_len);
     cl::Buffer buffer_c(context, CL_MEM_READ_WRITE, data_len);
 
-    queue.enqueueWriteBuffer(buffer_a, CL_FALSE, 0, data_len, &va[0]);
-    queue.enqueueWriteBuffer(buffer_b, CL_FALSE, 0, data_len, &vb[0]);
-    queue.enqueueWriteBuffer(buffer_c, CL_FALSE, 0, data_len, &vc[0]);
+
+    err = queue.enqueueWriteBuffer(buffer_a, CL_FALSE, 0, data_len, &va[0]);
+    err = queue.enqueueWriteBuffer(buffer_b, CL_FALSE, 0, data_len, &vb[0]);
+    err = queue.enqueueWriteBuffer(buffer_c, CL_FALSE, 0, data_len, &vc[0]);
 
 
-    kernel_add.setArg(0, buffer_a);
-    kernel_add.setArg(1, buffer_b);
-    kernel_add.setArg(2, buffer_c);
+    err = kernel_add.setArg(0, buffer_a);
+    err = kernel_add.setArg(1, buffer_b);
+    err = kernel_add.setArg(2, buffer_c);
 
     std::cout << "nTestCount=" << nTestCount << std::endl;
     {
       Timer timer("OpenCLMethodCpp_runkernel");
       for (int test = 0; test < nTestCount; test++) {
-        queue.enqueueNDRangeKernel(
-          kernel_add,
-          //cl::NullRange,
-          cl::NDRange(128),
-          cl::NDRange(va.size()),
-          cl::NullRange,
-          NULL,
-          &event);
+        err = queue.enqueueNDRangeKernel(
+                kernel_add,
+                cl::NullRange,
+                cl::NDRange(va.size()),
+                //cl::NullRange, //local size
+                cl::NDRange(128),//local size
+                NULL,
+                &event);
         //queue.flush();
         //event.wait();
       }
+      //err = queue.finish();
       s_kernel_times["OpenCLMethodCpp_runkernel"].first = timer.GetStepTime();
       //event.wait();
-      queue.enqueueReadBuffer(buffer_c, CL_TRUE, 0, data_len, &vc[0]);
-      queue.finish();
+      err = queue.enqueueReadBuffer(buffer_c, CL_TRUE, 0, data_len, &vc[0]);
+      err = queue.finish();
       s_kernel_times["OpenCLMethodCpp_runkernel"].second = timer.GetStepTime();
       double totalsum = 0;
       for (int idx = 0; idx < Len; idx++) {
@@ -406,7 +409,7 @@ int main(int argc, char *argv[]) {
     size = atoi(argv[1]);
     nTestCount = atoi(argv[2]);
   }
-  list_all_accelerators();
+  //list_all_accelerators();
 
   printf("vec_size=%d, nTestCount=%d\n", size, nTestCount);
 
@@ -424,11 +427,12 @@ int main(int argc, char *argv[]) {
   std::vector<float> b = generate_data(size);
 
   std::cout << "StandardMethod\n";
-  StandardMethod(a, b);
+  //StandardMethod(a, b);
 
   //std::cout << "\nOpenMPMethod\n";
   //OpenMPMethod(a, b);
-
+  //OpenCLMethodCpp(a, b);
+  //return 0;
   typedef std::function<void(const std::vector<float> &vec_a, const std::vector<float> &vec_b)> Func;
   typedef std::pair<Func, std::string> UserPair;
   std::vector<UserPair> funcs;
