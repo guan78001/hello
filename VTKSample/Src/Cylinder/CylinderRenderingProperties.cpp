@@ -16,14 +16,26 @@ VTK_MODULE_INIT(vtkInteractionStyle);
 #include <vtkCamera.h>
 #include <vtkSmartPointer.h>
 #include "vtkAutoInit.h"
-
-
+#include <vtkPLYWriter.h>
+#include <vtkTriangleFilter.h>
 int main(int, char *[]) {
   // This creates a polygonal cylinder model with eight circumferential facets
   // (i.e, in practice an octagonal prism).
   vtkSmartPointer<vtkCylinderSource> cylinder =
     vtkSmartPointer<vtkCylinderSource>::New();
-  cylinder->SetResolution(16);
+  cylinder->SetResolution(160);
+
+  vtkSmartPointer<vtkTriangleFilter> triangleFilter =
+    vtkSmartPointer<vtkTriangleFilter>::New();
+  triangleFilter->SetInputConnection(cylinder->GetOutputPort());
+  triangleFilter->Update();
+
+  //save to ply
+  std::string filename = "cylinder.ply";
+  auto plyWriter = vtkSmartPointer<vtkPLYWriter>::New();
+  plyWriter->SetFileName(filename.c_str());
+  plyWriter->SetInputConnection(triangleFilter->GetOutputPort());
+  plyWriter->Write();
 
   // The mapper is responsible for pushing the geometry into the graphics library.
   // It may also do color mapping, if scalars or other attributes are defined.
