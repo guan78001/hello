@@ -85,8 +85,28 @@ static std::vector<float> generate_data(size_t size) {
 
 #include <amp.h>
 #include <iostream>
+#include <map>
+#include <string>
 using namespace concurrency;
 
+void list_all_accelerators() {
+  std::vector<accelerator> accs = accelerator::get_all();
+
+  for (int i = 0; i < accs.size(); i++) {
+    std::wcout << "dev" << i << " " << accs[i].description << "\n";
+    std::wcout << accs[i].device_path << "\n";
+    std::wcout << accs[i].dedicated_memory << "\n";
+    std::wcout << (accs[i].supports_cpu_shared_memory ?
+                   "CPU shared memory: true" : "CPU shared memory: false") << "\n";
+    std::wcout << (accs[i].supports_double_precision ?
+                   "double precision: true" : "double precision: false") << "\n";
+    std::wcout << (accs[i].supports_limited_double_precision ?
+                   "limited double precision: true" : "limited double precision: false") << "\n";
+  }
+  //accelerator::set_default(accs[1].device_path);//set default GPU
+}
+
+std::map<std::string, std::pair<double, double>> s_kernel_times;
 void CppAmpMethod(const std::vector<float> &vec_a, const std::vector<float> &vec_b) {
   Timer timer("AMP");
   const int size = vec_a.size();
@@ -110,18 +130,21 @@ void CppAmpMethod(const std::vector<float> &vec_a, const std::vector<float> &vec
       );
       //sum.synchronize();
     }
-  }
+    s_kernel_times["CppAmpMethod_runkernel"].first = timer.GetStepTime();
 
-  double totalsum = 0;
-  for (int idx = 0; idx < size; idx++) {
-    totalsum += sum[idx];
+    double totalsum = 0;
+    for (int idx = 0; idx < size; idx++) {
+      totalsum += sum[idx];
+    }
+    s_kernel_times["CppAmpMethod_runkernel"].second = timer.GetStepTime();
+    printf("totalsum=%f\n", totalsum);
   }
-  printf("totalsum=%f\n", totalsum);
 }
 void CppAmpMethod2(const std::vector<float> &vec_a, const std::vector<float> &vec_b) {
   Timer timer("AMP2");
   const int size = vec_a.size();
   std::vector<float> vec_sum(size);
+  std::vector<float> &result = vec_sum;
   // Create C++ AMP objects.
   array<float, 1> a(size, &vec_a[0]);
   array<float, 1> b(size, &vec_b[0]);
@@ -129,7 +152,6 @@ void CppAmpMethod2(const std::vector<float> &vec_a, const std::vector<float> &ve
   array<float, 1> sum(size, &vec_sum[0]);
   //sum.discard_data();
   {
-
     Timer timer("CppAmpMethod_runkernel2");
     for (int testCount = 0; testCount < nTestCount; testCount++) {
 
@@ -141,15 +163,18 @@ void CppAmpMethod2(const std::vector<float> &vec_a, const std::vector<float> &ve
         sum[idx] += a[idx] * b[idx];
       }
       );
-      //sum.synchronize();
     }
+    //sum.synchronize();
+    s_kernel_times["CppAmpMethod_runkernel2"].first = timer.GetStepTime();
+    result = sum;
+    s_kernel_times["CppAmpMethod_runkernel2"].second = timer.GetStepTime();
+
+    double totalsum = 0;
+    for (int idx = 0; idx < size; idx++) {
+      totalsum += result[idx];
+    }
+    printf("totalsum=%f\n", totalsum);
   }
-  std::vector<float> result = sum;
-  double totalsum = 0;
-  for (int idx = 0; idx < size; idx++) {
-    totalsum += result[idx];
-  }
-  printf("totalsum=%f\n", totalsum);
 }
 #define __CL_ENABLE_EXCEPTIONS
 #include <CL/cl.hpp>
@@ -193,24 +218,29 @@ void OpenCLMethod_C(const std::vector<float> &va, const std::vector<float> &vb) 
     { sizeof(mem_B), (void *) &mem_B },
     { sizeof(mem_C), (void *) &mem_C },
   };
-  for (int test = 0; test < nTestCount; test++) {
-    //Timer timer("OpenCLMethod_C_runkernel");
-    opencl_inst.runKernel(opencl_inst.GetKernel(1), args, sizeof(args) / sizeof(args[0]), 1, global_worksize, local_worksize);
-  }
-  clEnqueueReadBuffer(opencl_inst.GetCommandQueue(), mem_C, CL_TRUE, 0, data_len, &vc[0], NULL, NULL, NULL);
-  clFinish(opencl_inst.GetCommandQueue());
+  {
+    Timer timer("OpenCLMethod_C_runkernel");
+    for (int test = 0; test < nTestCount; test++) {
+      opencl_inst.runKernel(opencl_inst.GetKernel(1), args, sizeof(args) / sizeof(args[0]), 1, global_worksize, local_worksize);
+    }
+    s_kernel_times["OpenCLMethod_C_runkernel"].first = timer.GetStepTime();
+    clEnqueueReadBuffer(opencl_inst.GetCommandQueue(), mem_C, CL_TRUE, 0, data_len, &vc[0], NULL, NULL, NULL);
+    clFinish(opencl_inst.GetCommandQueue());
+    s_kernel_times["OpenCLMethod_C_runkernel"].second = timer.GetStepTime();
+    double totalsum = 0;
+    for (int idx = 0; idx < Len; idx++) {
+      totalsum += vc[idx];
+    }
 
-  double totalsum = 0;
-  for (int idx = 0; idx < Len; idx++) {
-    totalsum += vc[idx];
+    printf("\ntotalsum=%f\n", totalsum);
   }
-  printf("\ntotalsum=%f\n", totalsum);
+
 
   clReleaseMemObject(mem_A);
   clReleaseMemObject(mem_B);
   clReleaseMemObject(mem_C);
 }
-int OpenCLMethod(const std::vector<float> &va, const std::vector<float> &vb) {
+int OpenCLMethodCpp(const std::vector<float> &va, const std::vector<float> &vb) {
   Timer timer("OpenCL");
   cl_int err = CL_SUCCESS;
   try {
@@ -269,27 +299,34 @@ int OpenCLMethod(const std::vector<float> &va, const std::vector<float> &vb) {
     kernel_add.setArg(2, buffer_c);
 
     std::cout << "nTestCount=" << nTestCount << std::endl;
-    for (int test = 0; test < nTestCount; test++) {
-      Timer timer("OpenCLMethod_runkernel");
-      queue.enqueueNDRangeKernel(
-        kernel_add,
-        cl::NullRange,
-        cl::NDRange(va.size()),
-        cl::NullRange,
-        NULL,
-        &event);
-      queue.flush();
+    {
+      Timer timer("OpenCLMethodCpp_runkernel");
+      for (int test = 0; test < nTestCount; test++) {
+        queue.enqueueNDRangeKernel(
+          kernel_add,
+          //cl::NullRange,
+          cl::NDRange(128),
+          cl::NDRange(va.size()),
+          cl::NullRange,
+          NULL,
+          &event);
+        //queue.flush();
+        //event.wait();
+      }
+      s_kernel_times["OpenCLMethodCpp_runkernel"].first = timer.GetStepTime();
       //event.wait();
-    }
-    //event.wait();
-    queue.enqueueReadBuffer(buffer_c, CL_TRUE, 0, data_len, &vc[0]);
-    //queue.finish();
+      queue.enqueueReadBuffer(buffer_c, CL_TRUE, 0, data_len, &vc[0]);
+      queue.finish();
+      s_kernel_times["OpenCLMethodCpp_runkernel"].second = timer.GetStepTime();
+      double totalsum = 0;
+      for (int idx = 0; idx < Len; idx++) {
+        totalsum += vc[idx];
+      }
 
-    double totalsum = 0;
-    for (int idx = 0; idx < Len; idx++) {
-      totalsum += vc[idx];
+      printf("totalsum=%f\n", totalsum);
     }
-    printf("totalsum=%f\n", totalsum);
+
+
   } catch (cl::Error &err) {
     std::cerr
         << "ERROR: "
@@ -363,12 +400,14 @@ int OpenCLWraperest() {
   return 0;
 }
 int main(int argc, char *argv[]) {
-  OpenCLWraperest();
+  //OpenCLWraperest();
   int size = 1024 * 1024;
   if (argc > 2) {
     size = atoi(argv[1]);
     nTestCount = atoi(argv[2]);
   }
+  list_all_accelerators();
+
   printf("vec_size=%d, nTestCount=%d\n", size, nTestCount);
 
   //{
@@ -393,16 +432,20 @@ int main(int argc, char *argv[]) {
   typedef std::function<void(const std::vector<float> &vec_a, const std::vector<float> &vec_b)> Func;
   typedef std::pair<Func, std::string> UserPair;
   std::vector<UserPair> funcs;
-  funcs.push_back(UserPair(CppAmpMethod, "CppAmpMethod"));
-  funcs.push_back(UserPair(CppAmpMethod, "CppAmpMethod"));
-
+  //funcs.push_back(UserPair(CppAmpMethod, "CppAmpMethod"));
+  //funcs.push_back(UserPair(CppAmpMethod, "CppAmpMethod"));
+  funcs.push_back({ StandardMethod, "StandardMethod"});
   funcs.push_back(UserPair(CppAmpMethod2, "CppAmpMethod2"));
   funcs.push_back(UserPair(CppAmpMethod2, "CppAmpMethod2"));
 
   funcs.push_back(UserPair(OpenCLMethod_C, "OpenCLMethod_C"));
   funcs.push_back(UserPair(OpenCLMethod_C, "OpenCLMethod_C"));
+
+  funcs.push_back(UserPair(OpenCLMethodCpp, "OpenCLMethodCpp"));
+  funcs.push_back(UserPair(OpenCLMethodCpp, "OpenCLMethodCpp"));
   std::vector<float> results(funcs.size());
   for (int i = 0; i < funcs.size(); i++) {
+    printf("***Run %s***\n", funcs[i].second.c_str());
     double t0 = omp_get_wtime();
     funcs[i].first(a, b);
     double t1 = omp_get_wtime();
@@ -412,21 +455,24 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < funcs.size(); i++) {
     printf("%s used time %f ms\n", funcs[i].second.c_str(), results[i] * 1000);
   }
+  for (auto &item : s_kernel_times) {
+    std::cout << item.first << " " << item.second.first << "ms, " << item.second.second << "ms" << std::endl;
+  }
   return 0;
 
-  std::cout << "\nCppAmpMethod\n";
-  CppAmpMethod(a, b);
-  CppAmpMethod(a, b);
+  //std::cout << "\nCppAmpMethod\n";
+  //CppAmpMethod(a, b);
+  //CppAmpMethod(a, b);
 
-  std::cout << "\nCppAmpMethod2\n";
-  CppAmpMethod2(a, b);
-  CppAmpMethod2(a, b);
-  //std::cout << "\nOpenCLMethod\n";
+  //std::cout << "\nCppAmpMethod2\n";
+  //CppAmpMethod2(a, b);
+  //CppAmpMethod2(a, b);
+  ////std::cout << "\nOpenCLMethod\n";
   //OpenCLMethod(a, b);
   //OpenCLMethod(a, b);
-  std::cout << "\nOpenCLMethod_C\n";
-  OpenCLMethod_C(a, b);
-  OpenCLMethod_C(a, b);
+  //std::cout << "\nOpenCLMethod_C\n";
+  //OpenCLMethod_C(a, b);
+  //OpenCLMethod_C(a, b);
   //a[0] = 0;
 
   //std::cout << "\nCppAmpMethod\n";
