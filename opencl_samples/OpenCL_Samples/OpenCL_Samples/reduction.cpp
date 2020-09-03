@@ -152,16 +152,23 @@ __kernel void reduce6(__global int *g_idata, __global int *g_odata) {
   sdata[tid] = g_idata[i] + g_idata[i + blockSize];
   barrier(CLK_LOCAL_MEM_FENCE);
 
-  if (tid < 256) sdata[tid] += sdata[tid + 256];
-  barrier(CLK_LOCAL_MEM_FENCE);
+  if (blockSize > 256) {
+    if (tid < 256) sdata[tid] += sdata[tid + 256];
+    barrier(CLK_LOCAL_MEM_FENCE);
+  }
 
-  if (tid < 128) sdata[tid] += sdata[tid + 128];
-  barrier(CLK_LOCAL_MEM_FENCE);
+  if (blockSize > 128) {
+    if (tid < 128) sdata[tid] += sdata[tid + 128];
+    barrier(CLK_LOCAL_MEM_FENCE);
+  }
 
-  if (tid < 64) sdata[tid] += sdata[tid + 64];
-  barrier(CLK_LOCAL_MEM_FENCE);
+  if (blockSize > 64) {
+    if (tid < 64) sdata[tid] += sdata[tid + 64];
+    barrier(CLK_LOCAL_MEM_FENCE);
+  }
 
   if (tid < 32) {
+    sdata[tid] += sdata[tid + 16];
     sdata[tid] += sdata[tid + 16];
     sdata[tid] += sdata[tid + 8];
     sdata[tid] += sdata[tid + 4];
