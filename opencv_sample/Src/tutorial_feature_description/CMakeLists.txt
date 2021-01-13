@@ -1,0 +1,1 @@
+OpenCV_Project(tutorial_feature_description)
