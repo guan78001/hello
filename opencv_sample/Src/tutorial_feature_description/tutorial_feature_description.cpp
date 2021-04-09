@@ -1,6 +1,6 @@
 ﻿#include <iostream>
 #include "opencv2/core.hpp"
-#include <gtest/gtest.h>
+
 //#define HAVE_OPENCV_XFEATURES2D
 #ifdef HAVE_OPENCV_XFEATURES2D
 #include <opencv2/highgui.hpp>
