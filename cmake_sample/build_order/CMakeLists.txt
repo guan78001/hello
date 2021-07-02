@@ -9,6 +9,10 @@ if (OPENMP_FOUND)
 	set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${OpenMP_SHARED_LINKER_FLAGS}")
 endif()
 
+#Output all EXEs and DLLs to one folder
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+
 add_subdirectory(dll1)
 add_subdirectory(lib1)
 add_subdirectory(console1)
