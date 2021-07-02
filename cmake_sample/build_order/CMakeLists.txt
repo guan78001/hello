@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 2.8)
 PROJECT (BuildOrder)
 
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-	set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${OpenMP_SHARED_LINKER_FLAGS}")
-endif()
+#add_compile_definitions(-DUNICODE -D_UNICODE -D_CRT_NONSTDC_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS)
+
+#add 
+message(${CMAKE_CXX_FLAGS})
+set(Disabled_Warnings "/wd4018 /wd4267 /wd4290 /wd4996")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Disabled_Warnings}")
+message(${CMAKE_CXX_FLAGS})
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${Disabled_Warnings}")
 
 #Output all EXEs and DLLs to one folder
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
