@@ -1,9 +1,8 @@
-set(VTK_DIR "c:/csd/git_clone/D3DVideo_2/3rdParty/vtk-8.2")
-set(VTK_VERSION           8.2)
-#8.2 static library
-set(VTK_LIB_DIR ${VTK_DIR}/lib/Win64)
+set(VTK_DIR "C:/csd/git_clone/3rdparty/3rdparty/vtk")
+set(VTK_VERSION           9.0$<$<CONFIG:Debug>:d>)
 message("VTK_DIR=${VTK_DIR}, VTK_VERSION=${VTK_VERSION}")
-
+#9.0 static library
+set(VTK_LIB_DIR ${VTK_DIR}/lib)
 include_directories(${VTK_DIR}/include)
 link_directories(${VTK_LIB_DIR})
 
@@ -60,6 +59,12 @@ set(VTK_LIB   vtkChartsCore-${VTK_VERSION}
 			  vtkViewsContext2D-${VTK_VERSION}
 			  vtkViewsCore-${VTK_VERSION}
 			  vtkglew-${VTK_VERSION}
+			  
+			  vtkloguru-${VTK_VERSION}
+			  vtkRenderingUI-${VTK_VERSION}
 			  opengl32
+			  dbghelp
+			  Ws2_32
+			  Psapi
 			  )
 
