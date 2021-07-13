@@ -1,5 +1,8 @@
+//#include <vtkAutoInit.h>
+//VTK_MODULE_INIT(vtkRenderingOpenGL);
+//VTK_MODULE_INIT(vtkInteractionStyle);
 #include <vtkAutoInit.h>
-VTK_MODULE_INIT(vtkRenderingOpenGL);
+VTK_MODULE_INIT(vtkRenderingOpenGL2); // VTK was built with vtkRenderingOpenGL2
 VTK_MODULE_INIT(vtkInteractionStyle);
 
 #include <vtkSmartPointer.h>

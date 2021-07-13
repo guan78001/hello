@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.20)
 PROJECT(VTKSamples)
-include(VTK_Config.cmake)
+include(VTK_8.2.cmake)
 
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 message(${CMAKE_BINARY_DIR})
