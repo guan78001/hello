@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="file_system.cpp" />
+    <ClCompile Include="TestMacroTable.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{945CFCED-362A-4C4C-934C-6C7C846F6D1C}</ProjectGuid>
