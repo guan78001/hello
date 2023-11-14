@@ -213,8 +213,28 @@ void test_critical_outside() {
   }
 #endif
 }
+void test3_parallel_outside_for() {
+  #pragma omp parallel
+  {
+    int x = 0;
+    #pragma omp master
+    {
+      printf("****** omp_thread_id=%d,&x=%p\n", omp_get_thread_num(), &x);
+    }
+    #pragma omp barrier
+    //#pragma omp critical
+    //printf("omp_thread_id=%d,&x=%p\n", omp_get_thread_num(), &x);
+
+    #pragma omp for ordered //nowait
+    for (int i = 0; i < 16; i++) {
+      #pragma omp ordered
+      printf("i=%d, omp_thread_id=%d\n", i, omp_get_thread_num());
+    }
+  }
+}
 int main() {
-  test_critical_outside();
+  //test_critical_outside();
+  test3_parallel_outside_for();
   return 0;
   //test1(4, 4);
   //test2();
