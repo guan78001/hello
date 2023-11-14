@@ -18,6 +18,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FileIO", "FileIO\FileIO.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj", "{D614A0E9-3EF9-4BB9-84B4-0C04BB4B4C81}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChangeParameter", "ChangeParameter\ChangeParameter.vcxproj", "{0433D4B3-F187-44DC-AD70-603D9EEA3BBC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -76,6 +78,14 @@ Global
 		{D614A0E9-3EF9-4BB9-84B4-0C04BB4B4C81}.Release|Win32.Build.0 = Release|Win32
 		{D614A0E9-3EF9-4BB9-84B4-0C04BB4B4C81}.Release|x64.ActiveCfg = Release|x64
 		{D614A0E9-3EF9-4BB9-84B4-0C04BB4B4C81}.Release|x64.Build.0 = Release|x64
+		{0433D4B3-F187-44DC-AD70-603D9EEA3BBC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0433D4B3-F187-44DC-AD70-603D9EEA3BBC}.Debug|Win32.Build.0 = Debug|Win32
+		{0433D4B3-F187-44DC-AD70-603D9EEA3BBC}.Debug|x64.ActiveCfg = Debug|x64
+		{0433D4B3-F187-44DC-AD70-603D9EEA3BBC}.Debug|x64.Build.0 = Debug|x64
+		{0433D4B3-F187-44DC-AD70-603D9EEA3BBC}.Release|Win32.ActiveCfg = Release|Win32
+		{0433D4B3-F187-44DC-AD70-603D9EEA3BBC}.Release|Win32.Build.0 = Release|Win32
+		{0433D4B3-F187-44DC-AD70-603D9EEA3BBC}.Release|x64.ActiveCfg = Release|x64
+		{0433D4B3-F187-44DC-AD70-603D9EEA3BBC}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

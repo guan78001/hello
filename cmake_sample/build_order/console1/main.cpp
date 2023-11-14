@@ -14,7 +14,7 @@ void input() {
 }
 int main() {
   print(1);
-  TestOpenMP(8);
+  //TestOpenMP(8);
 
   return 0;
 }
