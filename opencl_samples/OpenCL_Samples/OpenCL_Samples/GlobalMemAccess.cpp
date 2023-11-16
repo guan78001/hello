@@ -23,14 +23,35 @@ __kernel void offsetCopy2(
   __global float *idata,
   int offset) {
   int g_id = get_global_id(0);
-  int warp_thread_id = g_id % offset;
-  int warps = g_id / offset;
-  int reverse_id = warps * offset + offset - 1 - warp_thread_id;
-  odata[reverse_id] = idata[g_id];
+  if (offset == 0) {
+    odata[g_id] = idata[g_id];
+  } else {
+    int warp_thread_id = g_id % offset;
+    int warps = g_id / offset;
+    int reverse_id = warps * offset + offset - 1 - warp_thread_id;
+    //odata[reverse_id] = idata[g_id];
+    odata[g_id] = idata[reverse_id];
+  }
 }
+
+__kernel void simpleWrite(
+  __global float *odata,
+  __global float *idata,
+  int offset) {
+  int g_id = get_global_id(0);
+  odata[g_id] = g_id;
+}
+
+__kernel void strideCopy(__global float *odata,
+                         __global float *idata,
+                         int stride) {
+  int xid = get_global_id(0) * stride;
+  odata[xid] = idata[xid];
+}
+
                           );
 
-const int N = 1 << 24;  //
+const int N = 1 << 25;  //
 std::vector<float> in(N);
 std::vector<float> out(N);
 size_t bytes = N * sizeof(int);
@@ -59,6 +80,7 @@ int Test_OffsetCopy(cl::Context &context, cl::Program &program_, cl::Device &dev
   //5.copy data from CPU to GPU
   queue.enqueueWriteBuffer(buf_in, false, 0, bytes, &in[0]);
 
+  queue.finish();
   //event.wait();
   //6.run kernel
   cl::Event kernel_event;
@@ -81,7 +103,8 @@ int Test_OffsetCopy(cl::Context &context, cl::Program &program_, cl::Device &dev
   kernel_event.getProfilingInfo<uint64_t>(CL_PROFILING_COMMAND_END, &nstimeend);
 
   auto exec_time = nstimeend - nstimestart;
-  cout << "offset=" << offset << ", ns_exec_time=" << exec_time << endl;
+  float throughput = N * sizeof(float) / exec_time;
+  cout << "kernel:" << kernel_str << ", offset=" << offset << ", ns_exec_time=" << exec_time << " throughput:" << throughput << " GB/s" << endl;
   //7.read result from GPU
   err |= queue.enqueueReadBuffer(buf_out, false, 0, bytes, out.data(), NULL, &event);
   event.wait();
@@ -151,6 +174,29 @@ int main(void) {
         cout << out[i] << " ";
       }
       cout << endl;
+    }
+
+    vector<int> offsets3{ 1, 2, 4, 8, 16, 32};
+    for (int offset : offsets3) {
+      //execute kernel.
+      Test_OffsetCopy(context, program_, devices[0], "strideCopy", N / offset, offset);
+      cout << "output:\n";
+      for (int i = 0; i < 32; i++) {
+        cout << out[i] << " ";
+      }
+      cout << endl;
+    }
+
+    {
+      //simple write
+      for (int i = 0; i < 4; i++) {
+        Test_OffsetCopy(context, program_, devices[0], "simpleWrite", N, 0);
+        cout << "output:\n";
+        for (int i = 0; i < 32; i++) {
+          cout << out[i] << " ";
+        }
+        cout << endl;
+      }
     }
   } catch (cl::Error err) {
     std::cerr
